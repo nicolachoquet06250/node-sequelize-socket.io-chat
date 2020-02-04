@@ -1,0 +1,24 @@
+{
+  "name": "sequelize-test",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "prestart": "xcopy \"node_modules/socket.io-client\" \"public/javascripts/socket.io-client\" /E",
+    "start": "node ./bin/www",
+    "autostart": "nodemon ./bin/www"
+  },
+  "dependencies": {
+    "adaro": "~1.0.4",
+    "cookie-parser": "~1.4.4",
+    "debug": "~2.6.9",
+    "express": "~4.16.1",
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1",
+    "mysql2": "^2.1.0",
+    "node-sass-middleware": "0.11.0",
+    "nodemon": "^2.0.2",
+    "sequelize": "^5.21.3",
+    "socket.io": "^2.3.0",
+    "socket.io-client": "^2.3.0"
+  }
+}

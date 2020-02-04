@@ -1,0 +1,7 @@
+node_modules/
+node_modules/*
+.idea/
+.idea/*
+package-lock.json
+public/javascripts/socket.io-client/
+public/javascripts/socket.io-client/*
