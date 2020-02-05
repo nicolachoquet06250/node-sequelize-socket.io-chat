@@ -1,19 +1,20 @@
 const Sequelize = require('sequelize');
 const {sequelize} = require('../../sequelize');
-class Discussion extends Sequelize.Model {}
-
-Discussion.init({
+class User extends Sequelize.Model {}
+User.init({
     id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         unique: 'compositeIndex'
     },
-    name: Sequelize.STRING,
+    first_name: Sequelize.STRING,
+    last_name: Sequelize.STRING,
+    avatar: Sequelize.STRING,
     date: {
         type: Sequelize.DATE,
         defaultValue: Sequelize.NOW
     },
 }, {sequelize});
 
-module.exports = {Discussion};
+module.exports = {User};

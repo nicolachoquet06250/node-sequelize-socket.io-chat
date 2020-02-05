@@ -24,7 +24,6 @@
     window.addEventListener('load', () => {
         const my_name = prompt('Quel est ton nom ?');
         var server = new Socket('ws://localhost:3001/', my_name);
-        var authors = new Authors();
 
         let messages = document.querySelector('.messages');
         let message = document.querySelector('.message');
