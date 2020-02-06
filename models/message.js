@@ -16,14 +16,15 @@ module.exports = (sequelize, DataTypes) => {
         key: 'id'
       }
     },
+    // virtual properties
     Author: {
       type: DataTypes.VIRTUAL,
-      get() {
+      async get() {
         const db = require('../models');
         if(this.author !== undefined && this.author !== 0 && this.author !== null) {
-          return db.User.findOne({where: {id: this.author}});
+          return await db.User.findOne({where: {id: this.author}});
         }
-        return null;
+        return new Promise(resolve => resolve(null));
       },
       set(author) {
         if(author !== undefined && author !== null && typeof author === 'object') {
@@ -44,6 +45,19 @@ module.exports = (sequelize, DataTypes) => {
         if(discussion !== undefined && discussion !== null && typeof discussion === 'object') {
           this.discussion = discussion.id;
         }
+      }
+    },
+    JSON: {
+      type: DataTypes.VIRTUAL,
+      async get() {
+        return {
+          id: this.id,
+          author: await (await this.Author).JSON,
+          discussion: this.discussion,
+          text: this.text,
+          createdAt: this.createdAt,
+          updatedAt: this.updatedAt
+        };
       }
     }
   }, {engine: 'InnoDB'});
