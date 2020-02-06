@@ -6,7 +6,8 @@
     "fake-init": "node modules/sequelize/fake_datas/index.js",
     "prestart": "xcopy \"node_modules/socket.io-client\" \"public/javascripts/socket.io-client\" /E",
     "start": "node ./bin/www",
-    "autostart": "nodemon ./bin/www"
+    "autostart": "nodemon ./bin/www",
+    "migrate": "npx sequelize-cli db:migrate"
   },
   "dependencies": {
     "adaro": "~1.0.4",
