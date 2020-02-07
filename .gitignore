@@ -5,3 +5,4 @@ node_modules/*
 package-lock.json
 public/javascripts/socket.io-client/
 public/javascripts/socket.io-client/*
+public/javascripts/dest/*.js
