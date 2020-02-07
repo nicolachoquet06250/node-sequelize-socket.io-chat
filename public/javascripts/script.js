@@ -57,7 +57,43 @@ const pages_script = {
         message.addEventListener('keyup', () => message.value.length > 1 ? server.is_writing() : server.is_not_writing());
     },
     login: () => {
+        const tabs = [
+            'inscription',
+            'connexion',
+        ];
+        const load_tab = tab_id => {
+            if(tabs.indexOf(tab_id.replace('.', '')) !== -1) {
+                for(let tab of tabs) {
+                    document.querySelector(`.tabs .${tab}`).style.display = 'none';
+                    document.querySelector(`.menu .${tab}`).classList.remove('active');
+                }
+                document.querySelector(`.tabs .${tab_id}`).style.display = 'block';
+                document.querySelector(`.menu .${tab_id}`).classList.add('active');
+            }
+        };
 
+        load_tab('connexion');
+
+        const connexion_form = document.querySelector('.tabs .connexion form');
+        connexion_form.addEventListener('submit', e => {
+            e.preventDefault();
+            fetch(connexion_form.getAttribute('action'), {
+                method: connexion_form.getAttribute('method'),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: connexion_form.querySelector('#email_connexion').value,
+                    password: connexion_form.querySelector('#password_connexion').value
+                })
+            }).then(r => r.json())
+                .then(json => {
+                    console.log(json);
+                })
+        });
+
+        document.querySelector('.menu .connexion').addEventListener('click', () => load_tab('connexion'));
+        document.querySelector('.menu .inscription').addEventListener('click', () => load_tab('inscription'));
     }
 };
 function init_script(page) {

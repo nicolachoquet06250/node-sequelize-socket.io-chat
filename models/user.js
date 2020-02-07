@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     first_name: DataTypes.STRING,
     last_name: DataTypes.STRING,
     email: DataTypes.STRING,
+    password: DataTypes.STRING,
     avatar: DataTypes.STRING,
     // virtual properties
     MyDiscussions: {
@@ -37,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
           first_name: this.first_name,
           last_name: this.last_name,
           avatar: this.avatar,
+          email: this.email,
           my_discussions: (await this.MyDiscussions).map(d => d.id),
           createdAt: this.createdAt,
           updatedAt: this.updatedAt

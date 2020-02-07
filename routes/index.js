@@ -3,8 +3,8 @@ let router = express.Router();
 const {sequelize} = require('../modules/sequelize');
 const db = require('../models');
 
-/* GET home page. */
-router.get('/', function(req, res) {
+// PAGES
+router.get('/', (req, res) => {
   sequelize.authenticate().then(() => {
     res.render('index', { title: 'Succès Express' });
   }).catch(err => {
@@ -13,22 +13,28 @@ router.get('/', function(req, res) {
   });
 });
 
-router.post('/api/login', function (req, res) {
-  sequelize.authenticate().then(() => (async (email, password) => {
-    let user = await db.User.findOne({where: {email, password}});
-    return user;
-  })((body => JSON.parse(body).email)(req.body), (body => JSON.parse(body).password)(req.body)))
-      .then(async user => res.json(await user.JSON))
-      .catch(err => res.render('error', {message: 'Erreur Express', status: err.status}));
+router.get('/login', (req, res) => {
+  res.render('login', {});
 });
 
-router.post('/api/register', function (req, res) {
-  sequelize.authenticate().then(() => (async (first_name, last_name, email, password, avatar) => {
-    let user = await db.User.create({first_name, last_name, email, password, avatar});
-    return await user;
-  })((body => JSON.parse(body).first_name)(req.body), (body => JSON.parse(body).last_name)(req.body), (body => JSON.parse(body).email)(req.body), (body => JSON.parse(body).password)(req.body), (body => JSON.parse(body).avatar)(req.body)))
+// API
+router.post('/api/login', (req, res) => {
+  sequelize.authenticate().then(() => (async (email, password) => await db.User.findOne({where: {email, password}}))(req.body.email, req.body.password))
       .then(async user => res.json(await user.JSON))
-      .catch(err => res.json({error: err}));
+      .catch(err => res.json({error: err.message}));
+});
+
+router.post('/api/register', (req, res) => {
+  sequelize.authenticate().then(() => (async (first_name, last_name, email, password, avatar) =>
+      await db.User.create({first_name, last_name, email, password, avatar}))(
+          req.body.first_name,
+          req.body.last_name,
+          req.body.email,
+          req.body.password,
+          req.body.avatar
+      ))
+      .then(async user => res.json(await user.JSON))
+      .catch(err => res.json({error: err.message}));
 });
 
 module.exports = router;

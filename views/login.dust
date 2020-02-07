@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Connection</title>
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+    <script src="/javascripts/socket.io-client/dist/socket.io.js"></script>
+    <script src="/javascripts/Observable.js"></script>
+    <script src="/javascripts/Authors.js"></script>
+    <script src="/javascripts/socket.js"></script>
+</head>
+<body>
+    <nav class="menu">
+        <button class="connexion">Connexion</button>
+        <button class="inscription">Inscription</button>
+    </nav>
+    <div class="tabs">
+        <div class="connexion">
+            <form method="post" action="/api/login">
+                <input type="email" placeholder="email" id="email_connexion" />
+                <br />
+                <input type="password" placeholder="mot de passe" id="password_connexion" />
+                <br />
+                <input type="submit" value="Valider" />
+            </form>
+        </div>
+        <div class="inscription">
+            <form method="post" action="/api/register">
+                <input type="text" placeholder="prénom" id="firstname_connexion" />
+                <br />
+                <input type="text" placeholder="nom" id="lastname_connexion" />
+                <br />
+                <input type="email" placeholder="email" id="email_inscription" />
+                <input type="hidden" id="avatar" value="" />
+                <br />
+                <input type="password" placeholder="mot de passe" id="password_inscription" />
+                <br />
+                <input type="submit" value="Valider" />
+            </form>
+        </div>
+    </div>
+</body>
+<script src="/javascripts/script.js"></script>
+<script>window.addEventListener('load', () => init_script('login'));</script>
+</html>
