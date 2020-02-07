@@ -1,4 +1,6 @@
 const io = require('socket.io');
+const {sequelize} = require('../modules/sequelize');
+const db = require('../models');
 
 const SERVER = 'Serveur';
 const YOU = 'Vous';
@@ -9,6 +11,7 @@ const WRITING_CHANNELS = {
 };
 const WELCOME_CHANNEL = 'welcome';
 const MESSAGE_CHANNEL = 'chatmsg';
+const CHANNEL_NEW_CHANNEL = 'new_channel';
 const NAME_CHANNELS = {
     request: 'save_name',
     response: 'name_response'
@@ -61,6 +64,7 @@ const ws_conf = {
     send_name_response_on_broadcast: (id, msg) => ws_conf.broadcast(id, NAME_CHANNELS.response, {msg, author: SERVER}),
     send_message_on_broadcast: ({id, msg, author}) => ws_conf.broadcast(id, MESSAGE_CHANNEL, {msg, author}),
     on_catch_message: callback => ws_conf.client.on(MESSAGE_CHANNEL, callback),
+    on_catch_create_new_channel: callback => ws_conf.client.on(CHANNEL_NEW_CHANNEL, callback),
     on_catch_user: callback => ws_conf.client.on(NAME_CHANNELS.request, callback),
     on_catch_is_writing: callback => ws_conf.client.on(WRITING_CHANNELS.is, callback),
     on_catch_is_not_writing: callback => ws_conf.client.on(WRITING_CHANNELS.not, callback),
@@ -82,6 +86,26 @@ const ws_conf = {
                     ws_conf.send_message({id, msg, author: YOU});
                 }
             });
+            ws_conf.on_catch_create_new_channel(({id, name}) =>
+                sequelize.authenticate().then(() =>
+                    db.Discussion.create({name})
+                        .then(() => {
+                            (async function getDiscussionsJSON() {
+                                let tmp = [];
+                                for(let discussion of await db.Discussion.findAll()) {
+                                    tmp.push((await discussion.JSON));
+                                }
+                                return tmp;
+                            })().then(discussions => {
+                                ws_conf.broadcast(id, CHANNEL_NEW_CHANNEL, {discussions});
+                                ws_conf.emit(id, CHANNEL_NEW_CHANNEL, {created: true});
+                            });
+                        })
+                        .catch(() =>
+                            ws_conf.emit(id, CHANNEL_NEW_CHANNEL, {created: false})
+                        )
+                )
+            );
         });
     }
 };
