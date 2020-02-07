@@ -89,19 +89,18 @@ const ws_conf = {
             ws_conf.on_catch_create_new_channel(({id, name}) =>
                 sequelize.authenticate().then(() =>
                     db.Discussion.create({name})
-                        .then(() => {
-                            (async function getDiscussionsJSON() {
+                        .then(() => (async function getDiscussionsJSON() {
                                 let tmp = [];
                                 for(let discussion of await db.Discussion.findAll()) {
                                     tmp.push((await discussion.JSON));
                                 }
                                 return tmp;
-                            })().then(discussions => {
+                            })()
+                            .then(discussions => {
                                 ws_conf.broadcast(id, CHANNEL_NEW_CHANNEL, {discussions});
                                 ws_conf.emit(id, CHANNEL_NEW_CHANNEL, {created: true});
-                            });
-                        })
-                        .catch(() =>
+                            })
+                        ).catch(() =>
                             ws_conf.emit(id, CHANNEL_NEW_CHANNEL, {created: false})
                         )
                 )
