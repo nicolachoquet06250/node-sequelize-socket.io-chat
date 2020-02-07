@@ -5,22 +5,23 @@
     <title>{title}</title>
     <link rel='stylesheet' href='/stylesheets/style.css'/>
     <script src="/javascripts/socket.io-client/dist/socket.io.js"></script>
-    <script src="/javascripts/Observable.js"></script>
-    <script src="/javascripts/Authors.js"></script>
-    <script src="/javascripts/socket.js"></script>
+    <script src="/javascripts/dest/Observable.js"></script>
+    <script src="/javascripts/dest/Authors.js"></script>
+    <script src="/javascripts/dest/Socket.js"></script>
 </head>
 <body>
-<h1>{title}</h1>
-<p>Welcome to {title}</p>
-<ul class="messages"></ul>
-<p class="is_writing"></p>
-<textarea class="message" placeholder="Votre message ici..."></textarea>
-<br />
-<p class="message-info"></p>
-<br />
-<button type="button" class="send">Envoyer</button>
-<button type="button" class="disconnect">Déconnexion</button>
+    <h1>{title}</h1>
+    <p>Welcome to {title}</p>
+    <ul class="messages"></ul>
+    <p class="is_writing"></p>
+    <textarea class="message" placeholder="Votre message ici..."></textarea>
+    <br />
+    <p class="message-info"></p>
+    <br />
+    <button type="button" class="send">Envoyer</button>
+    <button type="button" class="disconnect">Déconnexion</button>
 </body>
-<script src="/javascripts/script.js"></script>
-<script>window.addEventListener('load', () => init_script('index'));</script>
+<script src="/javascripts/dest/script.js"></script>
+<script>var PAGE = 'index';</script>
+<script src="/javascripts/dest/load_page_script.js"></script>
 </html>

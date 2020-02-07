@@ -6,6 +6,7 @@ a {
   color: #00B7FF; }
 
 .menu button.active {
-  background: purple; }
+  background: purple;
+  color: white; }
 
 /*# sourceMappingURL=style.css.map */

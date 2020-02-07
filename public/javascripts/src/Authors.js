@@ -1,5 +1,8 @@
 class Authors extends Observable {
-    _authors = [];
+    constructor() {
+        super();
+        this._authors = [];
+    }
 
     onAuthorsChange(_old, _new) {
         let authors = '';

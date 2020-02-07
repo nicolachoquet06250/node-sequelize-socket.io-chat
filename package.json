@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "build": "babel public/javascripts/src -d public/javascripts/dest",
     "fake-init": "node modules/sequelize/fake_datas/index.js",
     "prestart": "xcopy \"node_modules/socket.io-client\" \"public/javascripts/socket.io-client\" /E",
     "start": "node ./bin/www",
@@ -23,5 +24,9 @@
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
     "sequelize-cli": "^5.5.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0"
   }
 }
