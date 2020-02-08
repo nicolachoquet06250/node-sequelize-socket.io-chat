@@ -82,4 +82,8 @@ class Socket {
         this.socket.on('is_not_writing', callback);
         return this;
     }
+    on_catch_new_channel(callback) {
+        this.socket.on('new_channel', callback);
+        return this;
+    }
 }

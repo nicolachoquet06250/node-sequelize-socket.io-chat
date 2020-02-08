@@ -3,18 +3,10 @@ module.exports = (sequelize, DataTypes) => {
   const Message = sequelize.define('Message', {
     text: DataTypes.STRING,
     author: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Users',
-        key: 'id'
-      }
+      type: DataTypes.INTEGER
     },
     discussion: {
-      type: DataTypes.INTEGER,
-      references: {
-        model: 'Discussions',
-        key: 'id'
-      }
+      type: DataTypes.INTEGER
     },
     // virtual properties
     Author: {

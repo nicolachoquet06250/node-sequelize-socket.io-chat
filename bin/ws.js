@@ -90,20 +90,20 @@ const ws_conf = {
                 sequelize.authenticate().then(() =>
                     db.Discussion.create({name})
                         .then(() => (async function getDiscussionsJSON() {
-                                let tmp = [];
-                                for(let discussion of await db.Discussion.findAll()) {
-                                    tmp.push((await discussion.JSON));
-                                }
-                                return tmp;
-                            })()
-                            .then(discussions => {
-                                ws_conf.broadcast(id, CHANNEL_NEW_CHANNEL, {discussions});
-                                ws_conf.emit(id, CHANNEL_NEW_CHANNEL, {created: true});
-                            })
-                        ).catch(() =>
-                            ws_conf.emit(id, CHANNEL_NEW_CHANNEL, {created: false})
-                        )
-                )
+                            let discussions = await db.Discussion.findAll();
+                            let tmp = [];
+                            for(let discussion of discussions)
+                                tmp.push(await discussion.JSON);
+                            return tmp;
+                        })())
+                        .then(discussions => {
+                            ws_conf.broadcast(id, CHANNEL_NEW_CHANNEL, {discussions});
+                            ws_conf.emit(id, CHANNEL_NEW_CHANNEL, {created: true, name});
+                        })
+                ).catch(err => {
+                    console.log(err);
+                    ws_conf.emit(id, CHANNEL_NEW_CHANNEL, {created: false, error: err.message})
+                })
             );
         });
     }

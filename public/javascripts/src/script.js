@@ -7,15 +7,24 @@ const pages_script = {
             var server = new Socket('ws://localhost:3001/', my_name);
 
             let messages = document.querySelector('.messages');
+            let discussions = document.querySelector('.discussions');
             let message = document.querySelector('.message');
             let send_button = document.querySelector('.send');
             let disconnect_button = document.querySelector('.disconnect');
+            let add_new_discussion = document.querySelector('.add-new-discussion');
 
             const add_message_to_list = (msg, author, me) => {
                 let message_li = document.createElement('li');
                 message_li.classList.add(me ? 'right' : 'left');
                 message_li.innerHTML = author + ': ' + msg;
                 messages.appendChild(message_li);
+            };
+            const add_discussion_to_list = discussion => {
+                let discussion_li = document.createElement('li');
+                discussion_li.innerHTML = discussion.name;
+                discussion_li.style.cursor = 'pointer';
+                discussion_li.addEventListener('click', () => {});
+                discussions.appendChild(discussion_li);
             };
 
             (function definitionDesEcouteursDEvenementsSockets() {
@@ -39,7 +48,16 @@ const pages_script = {
                     })
                     .on_catch_name_response(({msg, author}) => add_message_to_list(msg, author, false))
                     .on_catch_is_writing(author => Socket.add_author(author))
-                    .on_catch_is_not_writing(author => Socket.delete_author(author));
+                    .on_catch_is_not_writing(author => Socket.delete_author(author))
+                    .on_catch_new_channel(result => {
+                        if(result.created !== undefined) {
+                            add_discussion_to_list({name: result.name});
+                        } else if (result.discussions !== undefined) {
+                            discussions.innerHTML = '';
+                            for(let discussion of result.discussions)
+                                add_discussion_to_list(discussion);
+                        }
+                    });
             })();
 
             (function definitionDesClicksSurLesBoutons() {
@@ -57,10 +75,28 @@ const pages_script = {
                     localStorage.clear();
                     window.location.href = '/login';
                 });
+                add_new_discussion.addEventListener('click', () => {
+                    let discussion_name = prompt('Quel est le nom de votre discussion ?');
+                    server.emit('new_channel', {id: server.id, name: discussion_name});
+                });
             })();
 
             (function definitionDeLEcouteurDEvenementsPourSavoirQuandQuelquUnEstEnTrainDEcrire() {
                 message.addEventListener('keyup', () => message.value.length > 1 ? server.is_writing() : server.is_not_writing());
+            })();
+
+            (function definitionDesActionsAuChargementDeLaPage() {
+                fetch('/api/discussions', {
+                    method: 'get',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                }).then(r => r.json())
+                    .then(json => {
+                        if(json.success)
+                            for(let discussion of json.discussions)
+                                add_discussion_to_list(discussion)
+                    });
             })();
         } else window.location.href = '/login';
     },

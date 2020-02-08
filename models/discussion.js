@@ -6,24 +6,22 @@ module.exports = (sequelize, DataTypes) => {
     Messages: {
       type: DataTypes.VIRTUAL,
       async get() {
-        const db = require('../models');
-        let messages = await db.Message.findAll({where: {discussion: this.id}});
-        return messages;
+        return await (require('../models').Message.findAll({where: {discussion: this.id}}));
       },
       set(messages) {
-        const db = require('../models');
-        const _messages = this.Messages;
-        let messageToAdd = null;
-        for(let _message of _messages) {
-          for(let message of messages) {
-            if(message.id !== _message.id) {
-              messageToAdd = message;
-            }
-          }
-        }
-        if(messageToAdd !== null) {
-          db.Message.create(messageToAdd).then(() => {});
-        }
+        this.Messages.then(_messages => {
+          let messageToAdd = null;
+          if(_messages.length > 0)
+            for(let _message of _messages)
+              for(let message of messages)
+                if(message.id !== _message.id)
+                  messageToAdd = message;
+          else
+            messageToAdd = messages[0];
+          if(messageToAdd !== null)
+            require('../models').Message.create(messageToAdd).then(createdMessage =>
+                console.log(`Le message avec l'id ${createdMessage.id} à été créé !`));
+        });
       }
     },
     JSON: {
@@ -31,9 +29,7 @@ module.exports = (sequelize, DataTypes) => {
       async get() {
         let messages = await this.Messages;
         let messages_JSON = [];
-        for(let m of messages) {
-          messages_JSON.push(await m.JSON);
-        }
+        for(let m of messages) messages_JSON.push(await m.JSON);
         return {
           id: this.id,
           name: this.name,

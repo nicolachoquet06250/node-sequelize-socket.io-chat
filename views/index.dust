@@ -12,6 +12,7 @@
 <body>
     <h1>{title}</h1>
     <p>Welcome to {title}</p>
+    <ul class="discussions"></ul>
     <ul class="messages"></ul>
     <p class="is_writing"></p>
     <textarea class="message" placeholder="Votre message ici..."></textarea>
@@ -20,6 +21,7 @@
     <br />
     <button type="button" class="send">Envoyer</button>
     <button type="button" class="disconnect">Déconnexion</button>
+    <button type="button" class="add-new-discussion">Nouvelle discussion</button>
 </body>
 <script src="/javascripts/dest/script.js"></script>
 <script>var PAGE = 'index';</script>

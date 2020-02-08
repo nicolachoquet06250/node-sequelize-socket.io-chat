@@ -12,18 +12,10 @@ module.exports = {
         type: Sequelize.STRING
       },
       author: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Users',
-          key: 'id'
-        }
+        type: Sequelize.INTEGER
       },
       discussion: {
-        type: Sequelize.INTEGER,
-        references: {
-          model: 'Discussions',
-          key: 'id'
-        }
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
