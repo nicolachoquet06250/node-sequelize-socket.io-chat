@@ -130,11 +130,11 @@ const pages_script = {
                         password: connexion_form.querySelector('#password_connexion').value
                     })
                 }).then(r => r.json()).then(user => {
-                    if(user.error === undefined) {
-                        localStorage.setItem('user', JSON.stringify(user));
-                        window.location.href = '/';
-                    }
-                    else throw user.error;
+                    return new Promise((resolve, reject) =>
+                        user.error === undefined ? resolve(user) : reject(user.error));
+                }).then(user => {
+                    localStorage.setItem('user', JSON.stringify(user));
+                    window.location.href = '/';
                 }).catch(err => document.querySelector('#message_connexion').innerHTML = err);
             });
 
