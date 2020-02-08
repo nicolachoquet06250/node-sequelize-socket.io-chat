@@ -77,7 +77,8 @@ const pages_script = {
                 });
                 add_new_discussion.addEventListener('click', () => {
                     let discussion_name = prompt('Quel est le nom de votre discussion ?');
-                    server.emit('new_channel', {id: server.id, name: discussion_name});
+                    if(discussion_name !== '')
+                        server.emit('new_channel', {id: server.id, name: discussion_name});
                 });
             })();
 
