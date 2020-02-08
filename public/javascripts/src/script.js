@@ -35,14 +35,14 @@ const pages_script = {
                         add_message_to_list(msg, author, false);
                     })
                     .on_catch_disconnection(({msg, author}) => {
-                        function writeMessage() {
+                        const writeMessage = () => {
                             if (confirm('Voulez vous vraiment vous déconnecter ?')) {
                                 document.querySelector('.message-info').innerHTML = '<b>Vous avez été déconnecté</b>';
                                 disconnect_button.style.display = 'none';
                                 send_button.style.display = 'none';
                                 message.setAttribute('disabled', 'disabled');
                             }
-                        }
+                        };
 
                         author === 'Vous' && msg === true ? writeMessage() : add_message_to_list(msg, author, false)
                     })
@@ -104,13 +104,19 @@ const pages_script = {
     login: () => {
         const tabs = ['inscription', 'connexion'];
         const load_tab = tab_id => {
+            function unselect_complete_tab(tab) {
+                document.querySelector(`.tabs .${tab}`).style.display = 'none';
+                document.querySelector(`.menu .${tab}`).classList.remove('active');
+            }
+            function select_complete_tab(tab) {
+                document.querySelector(`.tabs .${tab}`).style.display = 'block';
+                document.querySelector(`.menu .${tab}`).classList.add('active');
+            }
+
             if(tabs.indexOf(tab_id.replace('.', '')) !== -1) {
-                for(let tab of tabs) {
-                    document.querySelector(`.tabs .${tab}`).style.display = 'none';
-                    document.querySelector(`.menu .${tab}`).classList.remove('active');
-                }
-                document.querySelector(`.tabs .${tab_id}`).style.display = 'block';
-                document.querySelector(`.menu .${tab_id}`).classList.add('active');
+                for(let tab of tabs)
+                    unselect_complete_tab(tab);
+                select_complete_tab(tab_id);
             }
         };
 
@@ -129,13 +135,15 @@ const pages_script = {
                         email: connexion_form.querySelector('#email_connexion').value,
                         password: connexion_form.querySelector('#password_connexion').value
                     })
-                }).then(r => r.json()).then(user => {
-                    return new Promise((resolve, reject) =>
-                        user.error === undefined ? resolve(user) : reject(user.error));
-                }).then(user => {
-                    localStorage.setItem('user', JSON.stringify(user));
-                    window.location.href = '/';
-                }).catch(err => document.querySelector('#message_connexion').innerHTML = err);
+                })
+                    .then(r => r.json())
+                    .then(user =>
+                        new Promise((resolve, reject) =>
+                            user.error === undefined ? resolve(user) : reject(user.error))
+                    ).then(user => {
+                        localStorage.setItem('user', JSON.stringify(user));
+                        window.location.href = '/';
+                    }).catch(err => document.querySelector('#message_connexion').innerHTML = err);
             });
 
             const inscription_form = document.querySelector('.tabs .inscription form');
@@ -153,10 +161,15 @@ const pages_script = {
                         email: inscription_form.querySelector('#email_inscription').value,
                         password: inscription_form.querySelector('#password_inscription').value
                     })
-                }).then(r => r.json()).then(user => {
-                    if(user.error === undefined) load_tab('connexion');
-                    else throw user.error;
-                }).catch(err => document.querySelector('#message_inscription').innerHTML = err)
+                })
+                    .then(r => r.json())
+                    .then(user =>
+                        new Promise((resolve, reject) =>
+                            user.error === undefined ? resolve(user) : reject(user.error)
+                        )
+                    )
+                    .then(() => load_tab('connexion'))
+                    .catch(err => document.querySelector('#message_inscription').innerHTML = err)
             });
         })();
 
