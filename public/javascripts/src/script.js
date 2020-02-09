@@ -120,17 +120,21 @@ const pages_script = {
 
             (function definitionDesClicksSurLesBoutons() {
                 send_button.addEventListener('click', () => {
-                    if (message.value !== 'disconnection') {
-                        server.emit('user_stop_write', {id: server.id, user: user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
-                        server.emit('new_message', {
-                            id: server.id,
-                            discussion: {
-                                id: parseInt(localStorage.getItem('current_discussion'))
-                            },
-                            author: user,
-                            message: message.value
-                        });
-                    }
+                    server.emit('user_stop_write', {
+                        id: server.id,
+                        user: user,
+                        discussion: {
+                            id: parseInt(localStorage.getItem('current_discussion'))
+                        }
+                    });
+                    server.emit('new_message', {
+                        id: server.id,
+                        discussion: {
+                            id: parseInt(localStorage.getItem('current_discussion'))
+                        },
+                        author: user,
+                        message: message.value
+                    });
                     message.value = '';
                 });
                 disconnect_button.addEventListener('click', () => {
