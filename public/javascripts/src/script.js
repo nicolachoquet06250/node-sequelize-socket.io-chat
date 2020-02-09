@@ -13,80 +13,53 @@ const pages_script = {
             let disconnect_button = document.querySelector('.disconnect');
             let add_new_discussion = document.querySelector('.add-new-discussion');
 
+            const save_current_discussion = discussion => {
+                localStorage.setItem('current_discussion', discussion.id);
+            };
+            const get_current_discussion = () => {
+                let current_discussion_id = parseInt(localStorage.getItem('current_discussion'));
+                if(current_discussion_id) server.emit('get_discussion', {
+                        id: server.id,
+                        discussion: {
+                            id: current_discussion_id
+                        }, user
+                    });
+            };
             const add_message_to_list = (msg, author, me) => {
                 let message_li = document.createElement('li');
                 message_li.classList.add(me ? 'right' : 'left');
-                message_li.innerHTML = author + ': ' + msg;
+                message_li.innerHTML = (me ? 'Moi' : author.first_name) + ': ' + msg;
                 messages.appendChild(message_li);
             };
             const add_discussion_to_list = discussion => {
                 let discussion_li = document.createElement('li');
                 discussion_li.innerHTML = discussion.name;
                 discussion_li.style.cursor = 'pointer';
-                discussion_li.addEventListener('click', () => {});
+                discussion_li.addEventListener('click', () => {
+                    server.emit('get_discussion', {
+                        id: server.id,
+                        discussion: {
+                            id: discussion.id
+                        }, user
+                    });
+                    save_current_discussion(discussion);
+                });
                 discussions.appendChild(discussion_li);
             };
+            const load_discussion = discussion => {
+                document.querySelector('.discussion-title').innerHTML = `Messages de '${discussion.name}'`;
+                messages.innerHTML = '';
+                for(let message of discussion.messages)
+                    add_message_to_list(message.text, message.author, user.id === message.author.id);
 
-            (function definitionDesEcouteursDEvenementsSockets() {
-                server.on_catch_message(({msg, author}) => add_message_to_list(msg, author, author === 'Vous'))
-                    .on_catch_welcome(({id, msg, author}) => {
-                        server.id = id;
-                        server.emit('save_name', {id: server.id, name: my_name});
-                        add_message_to_list(msg, author, false);
-                    })
-                    .on_catch_disconnection(({msg, author}) => {
-                        const writeMessage = () => {
-                            if (confirm('Voulez vous vraiment vous déconnecter ?')) {
-                                document.querySelector('.message-info').innerHTML = '<b>Vous avez été déconnecté</b>';
-                                disconnect_button.style.display = 'none';
-                                send_button.style.display = 'none';
-                                message.setAttribute('disabled', 'disabled');
-                            }
-                        };
-
-                        author === 'Vous' && msg === true ? writeMessage() : add_message_to_list(msg, author, false)
-                    })
-                    .on_catch_name_response(({msg, author}) => add_message_to_list(msg, author, false))
-                    .on_catch_is_writing(author => Socket.add_author(author))
-                    .on_catch_is_not_writing(author => Socket.delete_author(author))
-                    .on_catch_new_channel(result => {
-                        if(result.created !== undefined) {
-                            add_discussion_to_list({name: result.name});
-                        } else if (result.discussions !== undefined) {
-                            discussions.innerHTML = '';
-                            for(let discussion of result.discussions)
-                                add_discussion_to_list(discussion);
-                        }
-                    });
-            })();
-
-            (function definitionDesClicksSurLesBoutons() {
-                send_button.addEventListener('click', () => {
-                    if (message.value !== 'disconnect') {
-                        server.is_not_writing();
-                        server.send_message(message.value);
-                    }
-                    message.value = '';
-                });
-                disconnect_button.addEventListener('click', () => {
-                    server.send_message('disconnect');
-                    server.is_not_writing();
-                    localStorage.removeItem('user');
-                    localStorage.clear();
-                    window.location.href = '/login';
-                });
-                add_new_discussion.addEventListener('click', () => {
-                    let discussion_name = prompt('Quel est le nom de votre discussion ?');
-                    if(discussion_name !== '')
-                        server.emit('new_channel', {id: server.id, name: discussion_name});
-                });
-            })();
-
-            (function definitionDeLEcouteurDEvenementsPourSavoirQuandQuelquUnEstEnTrainDEcrire() {
-                message.addEventListener('keyup', () => message.value.length > 1 ? server.is_writing() : server.is_not_writing());
-            })();
-
-            (function definitionDesActionsAuChargementDeLaPage() {
+                save_current_discussion(discussion);
+            };
+            const quit_discussion = () => {
+                messages.innerHTML = '';
+                document.querySelector('.discussion-title').innerHTML = '';
+                localStorage.removeItem('current_discussion');
+            };
+            const init_discussions = () => {
                 fetch('/api/discussions', {
                     method: 'get',
                     headers: {
@@ -96,8 +69,90 @@ const pages_script = {
                     .then(json => {
                         if(json.success)
                             for(let discussion of json.discussions)
-                                add_discussion_to_list(discussion)
-                    });
+                                add_discussion_to_list(discussion);
+
+                            get_current_discussion();
+                    })
+            };
+
+            (function definitionDesEcouteursDEvenementsSockets() {
+                server.save_client();
+                server.on_new_discussion(response => {
+                    if(response.created)
+                        add_discussion_to_list(response.discussion);
+                });
+                server.on_new_discussion_broadcast(({discussions}) => {
+                    for(let discussion of discussions)
+                        add_discussion_to_list(discussion);
+                });
+                server.on_welcome(response => {
+                    add_message_to_list(`Vous êtes bien connecté !`, {first_name: 'Serveur'}, false)
+                });
+                server.on_welcome_broadcast(response => {
+                    console.log('broadcast');
+                    add_message_to_list(`L'utilisateur ${response.user.first_name} s'est connecté !`, {first_name: 'Serveur'}, false)
+                });
+                server.on_get_discussion(response => {
+                    if(!response.error)
+                        load_discussion(response.discussion);
+                });
+                server.on_new_message(message => {
+                    if(message.discussion === parseInt(localStorage.getItem('current_discussion')))
+                        add_message_to_list(message.text, message.author, true)
+                });
+                server.on_new_message_broadcast(message => {
+                    if(message.discussion === parseInt(localStorage.getItem('current_discussion')))
+                        add_message_to_list(message.text, message.author, false);
+                });
+                server.on_disconnect(quit_discussion);
+                server.on_disconnect_broadcast(response => {
+                    add_message_to_list(`L'utilisateur ${response.user.first_name} s'est déconnecté !`, {first_name: 'Serveur'}, false)
+                });
+                server.on_user_write(response => {
+                    if(response.user.id !== user.id && response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
+                        Socket.add_author(response.user.first_name)
+                });
+                server.on_user_stop_write(response => {
+                    if(response.user.id !== user.id && response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
+                        Socket.delete_author(response.user.first_name)
+                });
+            })();
+
+            (function definitionDesClicksSurLesBoutons() {
+                send_button.addEventListener('click', () => {
+                    if (message.value !== 'disconnection') {
+                        server.emit('user_stop_write', {id: server.id, user: user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
+                        server.emit('new_message', {
+                            id: server.id,
+                            discussion: {
+                                id: parseInt(localStorage.getItem('current_discussion'))
+                            },
+                            author: user,
+                            message: message.value
+                        });
+                    }
+                    message.value = '';
+                });
+                disconnect_button.addEventListener('click', () => {
+                    server.emit('disconnection', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
+                    server.emit('user_stop_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
+                });
+                add_new_discussion.addEventListener('click', () => {
+                    let discussion_name = prompt('Quel est le nom de votre discussion ?');
+                    if(discussion_name !== '')
+                        server.emit('new_channel', {id: server.id, name: discussion_name});
+                });
+            })();
+
+            (function definitionDeLEcouteurDEvenementsPourSavoirQuandQuelquUnEstEnTrainDEcrire() {
+                message.addEventListener('keyup', () =>
+                    message.value.length > 1
+                        ? server.emit('user_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}})
+                            : server.emit('user_stop_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}}));
+            })();
+
+            (function definitionDesActionsAuChargementDeLaPage() {
+                init_discussions();
             })();
         } else window.location.href = '/login';
     },

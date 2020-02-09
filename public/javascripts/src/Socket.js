@@ -58,32 +58,72 @@ class Socket {
         });
     }
 
-    on_catch_welcome(callback) {
-        this.socket.on('welcome', callback);
+    save_client() {
+        this.socket.on('save_client', ({id}) => {
+            this.id = id;
+        })
+    }
+
+    on_catch_welcome(discussion, callback) {
+        this.socket.on(`${discussion}_welcome`, callback);
         return this;
     }
-    on_catch_message(callback) {
-        this.socket.on('chatmsg', callback);
+    on_catch_message(discussion, callback) {
+        this.socket.on(`${discussion}_chatmsg`, callback);
         return this;
     }
-    on_catch_disconnection(callback) {
-        this.socket.on('disconnection', callback);
+    on_catch_disconnection(discussion, callback) {
+        this.socket.on(`${discussion}_disconnection`, callback);
         return this;
     }
-    on_catch_name_response(callback) {
-        this.socket.on('name_response', callback);
+    on_catch_name_response(discussion, callback) {
+        this.socket.on(`${discussion}_name_response`, callback);
         return this;
     }
-    on_catch_is_writing(callback) {
-        this.socket.on('is_writing', callback);
+    on_catch_is_writing(discussion, callback) {
+        this.socket.on(`${discussion}_is_writing`, callback);
         return this;
     }
-    on_catch_is_not_writing(callback) {
-        this.socket.on('is_not_writing', callback);
+    on_catch_is_not_writing(discussion, callback) {
+        this.socket.on(`${discussion}_is_not_writing`, callback);
         return this;
     }
     on_catch_new_channel(callback) {
         this.socket.on('new_channel', callback);
         return this;
+    }
+
+    on_welcome(callback) {
+        this.socket.on('welcome', callback);
+    }
+    on_welcome_broadcast(callback) {
+        this.socket.on('welcome_broadcast', callback);
+    }
+    on_new_discussion(callback) {
+        this.socket.on('new_discussion', callback)
+    }
+    on_new_discussion_broadcast(callback) {
+        this.socket.on('new_discussion_broadcast', callback)
+    }
+    on_new_message(callback) {
+        this.socket.on('new_message', callback)
+    }
+    on_new_message_broadcast(callback) {
+        this.socket.on('new_message_broadcast', callback)
+    }
+    on_get_discussion(callback) {
+        this.socket.on('get_discussion', callback)
+    }
+    on_disconnect(callback) {
+        this.socket.on('disconnection', callback)
+    }
+    on_disconnect_broadcast(callback) {
+        this.socket.on('disconnection_broadcast', callback)
+    }
+    on_user_write(callback) {
+        this.socket.on('user_write', callback)
+    }
+    on_user_stop_write(callback) {
+        this.socket.on('user_stop_write', callback)
     }
 }

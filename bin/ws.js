@@ -2,31 +2,37 @@ const io = require('socket.io');
 const {sequelize} = require('../modules/sequelize');
 const db = require('../models');
 
-const SERVER = 'Serveur';
-const YOU = 'Vous';
-
-const WRITING_CHANNELS = {
-    is: 'is_writing',
-    not: 'is_not_writing'
-};
-const WELCOME_CHANNEL = 'welcome';
-const MESSAGE_CHANNEL = 'chatmsg';
-const CHANNEL_NEW_CHANNEL = 'new_channel';
-const NAME_CHANNELS = {
-    request: 'save_name',
-    response: 'name_response'
-};
-
 const ws_conf = {
+    SERVER: 'Serveur',
+    YOU: 'Vous',
+    WRITING_CHANNELS: {is: 'user_write', not: 'user_stop_write'},
+    WELCOME_CHANNEL: 'user_connected',
+    MESSAGE_CHANNEL: 'new_message',
+    CHANNEL_NEW_CHANNEL: 'new_discussion',
+    NAME_CHANNELS: {request: 'save_name', response: 'name_response'},
+
+    broadcast: (id, channel, message) => {
+        for(let client of ws_conf.server.sockets.rooms) {
+            if(client.id !== id) {
+                client.emit(channel, message);
+            }
+        }
+    },
+    emit: (id, channel, message) => {
+        let client;
+        if((client = ws_conf.get_client(id)) !== undefined) {
+            client.emit(channel, message)
+        }
+    },
+
     init: http_server => ws_conf.server = io(http_server),
     init_client: client => {
         ws_conf.client = client;
+        client.emit('save_client', {id: client.id});
         ws_conf.save_client();
         return ws_conf;
     },
-    save_client: () => {
-        ws_conf.server.sockets.rooms.push(ws_conf.client);
-    },
+    save_client: () => ws_conf.server.sockets.rooms.push(ws_conf.client),
     unSave_client: id => {
         for(let i in ws_conf.server.sockets.rooms) {
             if(ws_conf.server.sockets.rooms[i].id === id) {
@@ -41,10 +47,7 @@ const ws_conf = {
         }
         ws_conf.server.sockets.rooms = tmp;
     },
-    say_welcome: () => {
-        ws_conf.client.emit(WELCOME_CHANNEL, {id: ws_conf.client.id, msg: 'Bienvenue sur le tchat', author: SERVER});
-        return ws_conf;
-    },
+
     get_client: id => {
         for(let c of ws_conf.server.sockets.rooms) {
             if(c.id === id) {
@@ -52,43 +55,34 @@ const ws_conf = {
             }
         }
     },
-    broadcast: (id, channel, message) => {
-        for(let client of ws_conf.server.sockets.rooms) {
-            if(client.id !== id) {
-                client.emit(channel, message);
-            }
-        }
+
+    say_welcome: (id, discussion, user) => {
+        ws_conf.emit(id, 'welcome', {user, discussion});
+        ws_conf.broadcast(id, 'welcome_broadcast', {user, discussion})
     },
-    emit: (id, channel, message) => ws_conf.get_client(id).emit(channel, message),
-    send_message: ({id, msg, author}) => ws_conf.emit(id, MESSAGE_CHANNEL, {msg, author}),
-    send_name_response_on_broadcast: (id, msg) => ws_conf.broadcast(id, NAME_CHANNELS.response, {msg, author: SERVER}),
-    send_message_on_broadcast: ({id, msg, author}) => ws_conf.broadcast(id, MESSAGE_CHANNEL, {msg, author}),
-    on_catch_message: callback => ws_conf.client.on(MESSAGE_CHANNEL, callback),
-    on_catch_create_new_channel: callback => ws_conf.client.on(CHANNEL_NEW_CHANNEL, callback),
-    on_catch_user: callback => ws_conf.client.on(NAME_CHANNELS.request, callback),
-    on_catch_is_writing: callback => ws_conf.client.on(WRITING_CHANNELS.is, callback),
-    on_catch_is_not_writing: callback => ws_conf.client.on(WRITING_CHANNELS.not, callback),
+
+    on_new_discussion: callback => ws_conf.client.on('new_discussion', callback),
+    on_new_message: callback => ws_conf.client.on('new_message', callback),
+    on_get_discussion: callback => ws_conf.client.on('get_discussion', callback),
+    on_disconnect: callback => ws_conf.client.on('disconnection', callback),
+    on_user_write: callback => ws_conf.client.on('user_write', callback),
+    on_user_stop_write: callback => ws_conf.client.on('user_stop_write', callback),
 
     ws: http_server => {
         ws_conf.init(http_server);
         ws_conf.server.on('connection', client => {
-            ws_conf.init_client(client).say_welcome();
-            ws_conf.on_catch_user(({id, name}) => ws_conf.send_name_response_on_broadcast(id, `${name} s'est connecté !`));
-            ws_conf.on_catch_is_writing(({id, author}) => ws_conf.broadcast(id, WRITING_CHANNELS.is, author));
-            ws_conf.on_catch_is_not_writing(({id, author}) => ws_conf.broadcast(id, WRITING_CHANNELS.not, author));
-            ws_conf.on_catch_message( ({id, msg, author}) => {
-                if(msg === 'disconnect') {
-                    ws_conf.broadcast(id, 'disconnection', {msg: `${author} s'est deconnecté`, author: SERVER});
-                    ws_conf.emit(id, 'disconnection', {msg: true, author: YOU});
-                    ws_conf.unSave_client(id);
-                } else {
-                    ws_conf.send_message_on_broadcast({id, msg, author});
-                    ws_conf.send_message({id, msg, author: YOU});
-                }
+            ws_conf.init_client(client);
+            ws_conf.on_new_message(({id, discussion, author, message}) => {
+                sequelize.authenticate().then(() => db.Message.create({text: message, author: author.id, discussion: discussion.id}))
+                    .then(message => message.JSON)
+                    .then(json => {
+                        ws_conf.broadcast(id, 'new_message_broadcast', json);
+                        ws_conf.emit(id, 'new_message', json);
+                    });
             });
-            ws_conf.on_catch_create_new_channel(({id, name}) =>
+            ws_conf.on_new_discussion(({id, discussion}) => {
                 sequelize.authenticate().then(() =>
-                    db.Discussion.create({name})
+                    db.Discussion.create({name: discussion.name})
                         .then(() => (async function getDiscussionsJSON() {
                             let discussions = await db.Discussion.findAll();
                             let tmp = [];
@@ -97,14 +91,46 @@ const ws_conf = {
                             return tmp;
                         })())
                         .then(discussions => {
-                            ws_conf.broadcast(id, CHANNEL_NEW_CHANNEL, {discussions});
-                            ws_conf.emit(id, CHANNEL_NEW_CHANNEL, {created: true, name});
+                            ws_conf.broadcast(id, 'new_discussion_broadcast', {discussions});
+                            ws_conf.emit(id, 'new_discussion', {
+                                created: true,
+                                discussion: discussions[discussions.length - 1]
+                            });
                         })
-                ).catch(err => {
-                    console.log(err);
-                    ws_conf.emit(id, CHANNEL_NEW_CHANNEL, {created: false, error: err.message})
-                })
-            );
+                ).catch(err =>
+                    ws_conf.emit(id, ws_conf.CHANNEL_NEW_CHANNEL, {
+                        created: false,
+                        error: err.message
+                    }))
+            });
+            ws_conf.on_get_discussion(({id, discussion, user}) => {
+                sequelize.authenticate().then(() => db.Discussion.findOne({where: discussion}))
+                    .then(discussion => discussion.JSON)
+                    .then(json => {
+                        ws_conf.emit(id, 'get_discussion', {
+                            discussion: json,
+                            error: false
+                        });
+                        ws_conf.say_welcome(id, discussion, user);
+                    })
+                    .catch(err => {
+                        ws_conf.emit(id, 'get_discussion', {
+                            error: true,
+                            message: err.message
+                        })
+                    });
+            });
+            ws_conf.on_disconnect(response => {
+                ws_conf.broadcast(response.id, 'disconnection_broadcast', {user: response.user});
+                ws_conf.emit(response.id, 'disconnection', {user: response.user});
+                // ws_conf.unSave_client(id);
+            });
+            ws_conf.on_user_write(({id, discussion, user}) => {
+                ws_conf.broadcast(id, ws_conf.WRITING_CHANNELS.is, {user, discussion});
+            });
+            ws_conf.on_user_stop_write(({id, discussion, user}) => {
+                ws_conf.broadcast(id, ws_conf.WRITING_CHANNELS.not, {user, discussion});
+            });
         });
     }
 };

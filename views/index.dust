@@ -12,7 +12,9 @@
 <body>
     <h1>{title}</h1>
     <p>Welcome to {title}</p>
+    <h3>Discussions</h3>
     <ul class="discussions"></ul>
+    <h3 class="discussion-title"></h3>
     <ul class="messages"></ul>
     <p class="is_writing"></p>
     <textarea class="message" placeholder="Votre message ici..."></textarea>

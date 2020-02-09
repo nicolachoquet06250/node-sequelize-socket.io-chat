@@ -41,15 +41,21 @@ router.get('/api/discussions', (req, res) => {
   sequelize.authenticate().then(() => (async () => {
     let discussions = await db.Discussion.findAll();
     let _discussions = [];
-    for(let discussion of discussions) {
+    for(let discussion of discussions)
       _discussions.push(await discussion.JSON);
-    }
     return _discussions;
   })()).then(json => res.json({discussions: json, success: true}))
       .catch(err => {
-        console.log(err)
+        console.log(err);
         res.json({success: false})
       });
+});
+
+router.get('/api/discussion/:discussion_id', (req, res) => {
+  sequelize.authenticate().then(() => (async () => {
+    let discussion = await db.Discussion.findOne({where: {id: parseInt(req.param('discussion_id'))}});
+    return await discussion.JSON;
+  })()).then(json => res.json({discussion: json}))
 });
 
 module.exports = router;
