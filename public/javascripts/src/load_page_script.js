@@ -1,1 +1,1 @@
-window.addEventListener('load', () => init_script(PAGE));
+window.addEventListener('load', () => new Script(PAGE));

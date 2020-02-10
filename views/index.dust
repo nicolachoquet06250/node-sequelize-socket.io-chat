@@ -25,7 +25,7 @@
     <button type="button" class="disconnect">Déconnexion</button>
     <button type="button" class="add-new-discussion">Nouvelle discussion</button>
 </body>
-<script src="/javascripts/dest/script.js"></script>
+<script src="/javascripts/dest/Script.js"></script>
 <script>var PAGE = 'index';</script>
 <script src="/javascripts/dest/load_page_script.js"></script>
 </html>

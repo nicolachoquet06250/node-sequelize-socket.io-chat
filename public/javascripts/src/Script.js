@@ -1,5 +1,10 @@
-const pages_script = {
-    index: () => {
+class Script {
+    constructor(page) {
+        if(page in this)
+            this[page]();
+    }
+
+    index() {
         let user = localStorage.getItem('user');
         if(user !== undefined && user !== null) {
             user = JSON.parse(user);
@@ -19,11 +24,11 @@ const pages_script = {
             const get_current_discussion = () => {
                 let current_discussion_id = parseInt(localStorage.getItem('current_discussion'));
                 if(current_discussion_id) server.emit('get_discussion', {
-                        id: server.id,
-                        discussion: {
-                            id: current_discussion_id
-                        }, user
-                    });
+                    id: server.id,
+                    discussion: {
+                        id: current_discussion_id
+                    }, user
+                });
             };
             const add_message_to_list = (msg, author, me) => {
                 let message_li = document.createElement('li');
@@ -71,98 +76,99 @@ const pages_script = {
                             for(let discussion of json.discussions)
                                 add_discussion_to_list(discussion);
 
-                            get_current_discussion();
+                        get_current_discussion();
                     })
             };
 
             (function definitionDesEcouteursDEvenementsSockets() {
-                server.save_client();
-                server.save_user();
-                server.on_new_discussion(response => {
-                    if(response.created)
-                        add_discussion_to_list(response.discussion);
-                });
-                server.on_new_discussion_broadcast(response => {
-                    discussions.innerHTML = '';
-                    for(let discussion of response.discussions)
-                        add_discussion_to_list(discussion);
-                });
-                server.on_welcome(response => {
-                    add_message_to_list(`Vous êtes bien connecté !`, {first_name: 'Serveur'}, false)
-                });
-                server.on_welcome_broadcast(response => {
-                    if(response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
-                        add_message_to_list(`L'utilisateur ${response.user.first_name} s'est connecté !`, {first_name: 'Serveur'}, false)
-                });
-                server.on_get_discussion(response => {
-                    if(!response.error)
-                        load_discussion(response.discussion);
-                });
-                server.on_new_message(message => {
-                    if(message.discussion === parseInt(localStorage.getItem('current_discussion')))
-                        add_message_to_list(message.text, message.author, true)
-                });
-                server.on_new_message_broadcast(message => {
-                    if(message.discussion === parseInt(localStorage.getItem('current_discussion')))
-                        add_message_to_list(message.text, message.author, false);
-                });
-                server.on_disconnect(quit_discussion);
-                server.on_disconnect_broadcast(response => {
-                    add_message_to_list(`L'utilisateur ${response.user.first_name} s'est déconnecté !`, {first_name: 'Serveur'}, false)
-                });
-                server.on_user_write(response => {
-                    if(response.user.id !== user.id && response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
-                        Socket.add_author(response.user.first_name)
-                });
-                server.on_user_stop_write(response => {
-                    if(response.user.id !== user.id && response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
-                        Socket.delete_author(response.user.first_name)
-                });
-            })();
+                    server.save_client();
+                    server.save_user();
+                    server.on_new_discussion(response => {
+                        if(response.created)
+                            add_discussion_to_list(response.discussion);
+                    });
+                    server.on_new_discussion_broadcast(response => {
+                        discussions.innerHTML = '';
+                        for(let discussion of response.discussions)
+                            add_discussion_to_list(discussion);
+                    });
+                    server.on_welcome(response => {
+                        add_message_to_list(`Vous êtes bien connecté !`, {first_name: 'Serveur'}, false)
+                    });
+                    server.on_welcome_broadcast(response => {
+                        if(response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
+                            add_message_to_list(`L'utilisateur ${response.user.first_name} s'est connecté !`, {first_name: 'Serveur'}, false)
+                    });
+                    server.on_get_discussion(response => {
+                        if(!response.error)
+                            load_discussion(response.discussion);
+                    });
+                    server.on_new_message(message => {
+                        if(message.discussion === parseInt(localStorage.getItem('current_discussion')))
+                            add_message_to_list(message.text, message.author, true)
+                    });
+                    server.on_new_message_broadcast(message => {
+                        if(message.discussion === parseInt(localStorage.getItem('current_discussion')))
+                            add_message_to_list(message.text, message.author, false);
+                    });
+                    server.on_disconnect(quit_discussion);
+                    server.on_disconnect_broadcast(response => {
+                        add_message_to_list(`L'utilisateur ${response.user.first_name} s'est déconnecté !`, {first_name: 'Serveur'}, false)
+                    });
+                    server.on_user_write(response => {
+                        if(response.user.id !== user.id && response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
+                            Socket.add_author(response.user.first_name)
+                    });
+                    server.on_user_stop_write(response => {
+                        if(response.user.id !== user.id && response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
+                            Socket.delete_author(response.user.first_name)
+                    });
+                })();
 
             (function definitionDesClicksSurLesBoutons() {
-                send_button.addEventListener('click', () => {
-                    server.emit('user_stop_write', {
-                        id: server.id,
-                        user: user,
-                        discussion: {
-                            id: parseInt(localStorage.getItem('current_discussion'))
-                        }
+                    send_button.addEventListener('click', () => {
+                        server.emit('user_stop_write', {
+                            id: server.id,
+                            user: user,
+                            discussion: {
+                                id: parseInt(localStorage.getItem('current_discussion'))
+                            }
+                        });
+                        server.emit('new_message', {
+                            id: server.id,
+                            discussion: {
+                                id: parseInt(localStorage.getItem('current_discussion'))
+                            },
+                            author: user,
+                            message: message.value
+                        });
+                        message.value = '';
                     });
-                    server.emit('new_message', {
-                        id: server.id,
-                        discussion: {
-                            id: parseInt(localStorage.getItem('current_discussion'))
-                        },
-                        author: user,
-                        message: message.value
+                    disconnect_button.addEventListener('click', () => {
+                        server.emit('disconnection', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
+                        server.emit('user_stop_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
                     });
-                    message.value = '';
-                });
-                disconnect_button.addEventListener('click', () => {
-                    server.emit('disconnection', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
-                    server.emit('user_stop_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
-                });
-                add_new_discussion.addEventListener('click', () => {
-                    let discussion_name = prompt('Quel est le nom de votre discussion ?');
-                    if(discussion_name !== '')
-                        server.emit('new_discussion', {id: server.id, discussion: {name: discussion_name}});
-                });
-            })();
+                    add_new_discussion.addEventListener('click', () => {
+                        let discussion_name = prompt('Quel est le nom de votre discussion ?');
+                        if(discussion_name !== '')
+                            server.emit('new_discussion', {id: server.id, discussion: {name: discussion_name}});
+                    });
+                })();
 
             (function definitionDeLEcouteurDEvenementsPourSavoirQuandQuelquUnEstEnTrainDEcrire() {
-                message.addEventListener('keyup', () =>
-                    message.value.length > 1
-                        ? server.emit('user_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}})
+                    message.addEventListener('keyup', () =>
+                        message.value.length > 1
+                            ? server.emit('user_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}})
                             : server.emit('user_stop_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}}));
-            })();
+                })();
 
             (function definitionDesActionsAuChargementDeLaPage() {
                 init_discussions();
             })();
         } else window.location.href = '/login';
-    },
-    login: () => {
+    }
+
+    login() {
         const tabs = ['inscription', 'connexion'];
         const load_tab = tab_id => {
             function unselect_complete_tab(tab) {
@@ -202,9 +208,9 @@ const pages_script = {
                         new Promise((resolve, reject) =>
                             user.error === undefined ? resolve(user) : reject(user.error))
                     ).then(user => {
-                        localStorage.setItem('user', JSON.stringify(user));
-                        window.location.href = '/';
-                    }).catch(err => document.querySelector('#message_connexion').innerHTML = err);
+                    localStorage.setItem('user', JSON.stringify(user));
+                    window.location.href = '/';
+                }).catch(err => document.querySelector('#message_connexion').innerHTML = err);
             });
 
             const inscription_form = document.querySelector('.tabs .inscription form');
@@ -238,10 +244,5 @@ const pages_script = {
             document.querySelector('.menu .connexion').addEventListener('click', () => load_tab('connexion'));
             document.querySelector('.menu .inscription').addEventListener('click', () => load_tab('inscription'));
         })();
-    }
-};
-function init_script(page) {
-    if(page in pages_script) {
-        pages_script[page]();
     }
 }

@@ -7,7 +7,7 @@
 var app = require('../app');
 var debug = require('debug')('sequelize-test:server');
 var http = require('http');
-const {ws} = require("./ws");
+const Websocket = require("./Websocket");
 
 /**
  * Get port from environment and store in Express.
@@ -22,7 +22,7 @@ app.set('port', port);
 
 var server = http.createServer(app);
 
-ws.ws(server);
+new Websocket(server);
 
 /**
  * Listen on provided port, on all network interfaces.
