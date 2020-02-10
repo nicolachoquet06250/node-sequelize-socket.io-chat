@@ -1,5 +1,4 @@
 module.exports = class Websocket {
-    _socket = null;
     get socket() {
         return this._socket;
     }
@@ -7,7 +6,6 @@ module.exports = class Websocket {
         this._socket = require('socket.io')(http_server)
     }
 
-    _client = null;
     get client() {
         return this._client;
     }
@@ -26,23 +24,22 @@ module.exports = class Websocket {
 
     set user(user) {
         for(let room_id in this.socket.sockets.rooms) {
+            console.log(this.socket.sockets.rooms[room_id].id, this.client.id);
             if(this.socket.sockets.rooms[room_id].id === this.client.id) {
                 this.socket.sockets.rooms[room_id].user = user;
             }
         }
     }
 
-    _sequelize = null;
     get sequelize() {
-        if(this._sequelize === null) {
+        if(this._sequelize === null || this._sequelize === undefined) {
             this._sequelize = require('../modules/sequelize').sequelize;
         }
         return this._sequelize;
     }
 
-    _db = null;
     get database() {
-        if(this._db === null) {
+        if(this._db === null || this._db === undefined) {
             this._db = require('../models');
         }
         return this._db;
@@ -77,8 +74,12 @@ module.exports = class Websocket {
     }
 
     say_welcome(id, discussion, user) {
-        this.emit(id, 'welcome', {user, discussion});
-        this.broadcast(id, 'welcome_broadcast', {user, discussion})
+        this.sequelize.authenticate().then(() => this.database.Discussion.findOne({where: {id: discussion.id}}))
+            .then(d => d.JSON)
+            .then(discussion => {
+                this.emit(id, 'welcome', {user, discussion});
+                this.broadcast(id, 'welcome_broadcast', {user, discussion});
+            });
     }
 
     on_save_user(callback) {
@@ -177,7 +178,10 @@ module.exports = class Websocket {
                 this.broadcast(id, 'user_stop_write', {user, discussion});
             });
             this.client.on('disconnect', () => {
-                this.broadcast(this.client.id, 'disconnection_broadcast', {user: JSON.parse(this.get_client(client.id).user)});
+                console.log('disconnection_broadcast', client.id, this.get_client(client.id).user);
+                this.broadcast(client.id, 'disconnection_broadcast', {
+                    user: JSON.parse(this.get_client(client.id).user)
+                });
                 this.un_save_client(client.id);
             });
         });

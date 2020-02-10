@@ -155,16 +155,29 @@ class Script {
                             });
                     });
                     server.on_disconnect(quit_discussion);
-                    server.on_disconnect_broadcast(response => {
-                        if(response.discussion && response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
-                            add_message_to_list(`L'utilisateur ${response.user.first_name} s'est déconnecté !`, {first_name: 'Serveur'}, false)
-                        else {
-                            script.notification.push('Message du Serveur', {
-                                dir: 'ltr',
-                                lang: 'fr-FR',
-                                body: `L'utilisateur ${response.user.first_name} s'est déconnecté à la conversation '${response.discussion.name}' !`,
-                                icon: '/images/messenger.png'
-                            });
+                    server.on_disconnect_broadcast(({discussion, user: {first_name}}) => {
+                        console.log(discussion, first_name);
+                        if(discussion !== undefined) {
+                            if(discussion.id === parseInt(localStorage.getItem('current_discussion')))
+                                add_message_to_list(`L'utilisateur ${first_name} s'est déconnecté !`, {first_name: 'Serveur'}, false);
+                            else {
+                                script.notification.push('Message du Serveur', {
+                                    dir: 'ltr',
+                                    lang: 'fr-FR',
+                                    body: `L'utilisateur ${first_name} s'est déconnecté de la conversation '${discussion.name}' !`,
+                                    icon: '/images/messenger.png'
+                                });
+                            }
+                        } else {
+                            if(localStorage.getItem('current_discussion') === null)
+                                script.notification.push('Message du Serveur', {
+                                    dir: 'ltr',
+                                    lang: 'fr-FR',
+                                    body: `L'utilisateur ${first_name} s'est déconnecté !`,
+                                    icon: '/images/messenger.png'
+                                });
+                            else
+                                add_message_to_list(`L'utilisateur ${first_name} s'est déconnecté !`, {first_name: 'Serveur'}, false);
                         }
                     });
                     server.on_user_write(response => {
@@ -238,7 +251,6 @@ class Script {
                 select_complete_tab(tab_id);
             }
         };
-        let script = this;
 
         load_tab('connexion');
 
@@ -299,7 +311,7 @@ class Script {
         })();
 
         (function definitionDesActionsAuChargementDeLaPage() {
-            script.notification.push('test', {dir: 'ltr', lang: 'fr-FR', body: 'ceci est un nouveau message', icon: '/images/messenger.png'});
+            localStorage.removeItem('user');
         })();
     }
 }
