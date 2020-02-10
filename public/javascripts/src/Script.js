@@ -4,12 +4,42 @@ class Script {
             this[page]();
     }
 
+    Notification() {
+        const ask_notification_permission_if_not = () => {
+            if (window.Notification && Notification.permission !== "granted")
+                return Notification.requestPermission();
+            return new Promise((resolve, reject) => {});
+        };
+
+        ask_notification_permission_if_not()
+            .then(status => Notification.permission = Notification.permission !== status ? status : Notification.permission)
+            .catch(err => alert(err.message));
+
+        return {
+            push: (title, options) => {
+                if(Notification.permission === "denied")
+                    (new this.Notification()).push(title, options);
+                if(Notification.permission === "granted")
+                    new Notification(title, options);
+            }
+        };
+
+    }
+
+    get notification() {
+        if(this._notification === null || this._notification === undefined) {
+            this._notification = new this.Notification();
+        }
+        return this._notification;
+    }
+
     index() {
         let user = localStorage.getItem('user');
         if(user !== undefined && user !== null) {
             user = JSON.parse(user);
             const my_name = user.first_name;
             var server = new Socket('ws://localhost:3001/', my_name);
+            let script = this;
 
             let messages = document.querySelector('.messages');
             let discussions = document.querySelector('.discussions');
@@ -98,22 +128,44 @@ class Script {
                     server.on_welcome_broadcast(response => {
                         if(response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
                             add_message_to_list(`L'utilisateur ${response.user.first_name} s'est connecté !`, {first_name: 'Serveur'}, false)
+                        else
+                            script.notification.push('Message du Serveur', {
+                                dir: 'ltr',
+                                lang: 'fr-FR',
+                                body: `L'utilisateur ${response.user.first_name} s'est connecté à la conversation '${response.discussion.name}' !`,
+                                icon: '/images/messenger.png'
+                            });
                     });
                     server.on_get_discussion(response => {
                         if(!response.error)
                             load_discussion(response.discussion);
                     });
-                    server.on_new_message(message => {
-                        if(message.discussion === parseInt(localStorage.getItem('current_discussion')))
-                            add_message_to_list(message.text, message.author, true)
+                    server.on_new_message(({message}) => {
+                        add_message_to_list(message.text, message.author, true);
                     });
-                    server.on_new_message_broadcast(message => {
+                    server.on_new_message_broadcast(({message, discussion}) => {
                         if(message.discussion === parseInt(localStorage.getItem('current_discussion')))
                             add_message_to_list(message.text, message.author, false);
+                        else
+                            script.notification.push(`Message de ${message.author.first_name} ${message.author.last_name}`, {
+                                dir: 'ltr',
+                                lang: 'fr-FR',
+                                body: `L'utilisateur ${message.author.first_name} ${message.author.last_name} à laissé un message dans la conversation '${discussion.name}' !`,
+                                icon: '/images/messenger.png'
+                            });
                     });
                     server.on_disconnect(quit_discussion);
                     server.on_disconnect_broadcast(response => {
-                        add_message_to_list(`L'utilisateur ${response.user.first_name} s'est déconnecté !`, {first_name: 'Serveur'}, false)
+                        if(response.discussion && response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
+                            add_message_to_list(`L'utilisateur ${response.user.first_name} s'est déconnecté !`, {first_name: 'Serveur'}, false)
+                        else {
+                            script.notification.push('Message du Serveur', {
+                                dir: 'ltr',
+                                lang: 'fr-FR',
+                                body: `L'utilisateur ${response.user.first_name} s'est déconnecté à la conversation '${response.discussion.name}' !`,
+                                icon: '/images/messenger.png'
+                            });
+                        }
                     });
                     server.on_user_write(response => {
                         if(response.user.id !== user.id && response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
@@ -186,6 +238,7 @@ class Script {
                 select_complete_tab(tab_id);
             }
         };
+        let script = this;
 
         load_tab('connexion');
 
@@ -243,6 +296,10 @@ class Script {
         (function definitionDesClicksSurLesBoutons() {
             document.querySelector('.menu .connexion').addEventListener('click', () => load_tab('connexion'));
             document.querySelector('.menu .inscription').addEventListener('click', () => load_tab('inscription'));
+        })();
+
+        (function definitionDesActionsAuChargementDeLaPage() {
+            script.notification.push('test', {dir: 'ltr', lang: 'fr-FR', body: 'ceci est un nouveau message', icon: '/images/messenger.png'});
         })();
     }
 }

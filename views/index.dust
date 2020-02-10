@@ -8,6 +8,7 @@
     <script src="/javascripts/dest/Observable.js"></script>
     <script src="/javascripts/dest/Authors.js"></script>
     <script src="/javascripts/dest/Socket.js"></script>
+    <script src="/javascripts/dest/Script.js"></script>
 </head>
 <body>
     <h1>{title}</h1>
@@ -25,7 +26,6 @@
     <button type="button" class="disconnect">Déconnexion</button>
     <button type="button" class="add-new-discussion">Nouvelle discussion</button>
 </body>
-<script src="/javascripts/dest/Script.js"></script>
 <script>var PAGE = 'index';</script>
 <script src="/javascripts/dest/load_page_script.js"></script>
 </html>

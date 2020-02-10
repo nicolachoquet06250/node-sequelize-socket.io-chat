@@ -8,6 +8,7 @@
     <script src="/javascripts/dest/Observable.js"></script>
     <script src="/javascripts/dest/Authors.js"></script>
     <script src="/javascripts/dest/Socket.js"></script>
+    <script src="/javascripts/dest/Script.js"></script>
 </head>
 <body>
     <nav class="menu">
@@ -42,7 +43,6 @@
         </div>
     </div>
 </body>
-<script src="/javascripts/dest/Script.js"></script>
 <script>var PAGE = 'login';</script>
 <script src="/javascripts/dest/load_page_script.js"></script>
 </html>

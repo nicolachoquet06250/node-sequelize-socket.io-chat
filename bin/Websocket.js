@@ -113,8 +113,10 @@ module.exports = class Websocket {
                 this.sequelize.authenticate().then(() => this.database.Message.create({text: message, author: author.id, discussion: discussion.id}))
                     .then(message => message.JSON)
                     .then(json => {
-                        this.broadcast(id, 'new_message_broadcast', json);
-                        this.emit(id, 'new_message', json);
+                        this.database.Discussion.findOne({where: {id: discussion.id}}).then(_discussion => {
+                            this.broadcast(id, 'new_message_broadcast', {message: json, discussion: _discussion});
+                            this.emit(id, 'new_message', {message: json, discussion: _discussion});
+                        });
                     });
             });
             this.on_new_discussion(({id, discussion}) => {
@@ -161,8 +163,12 @@ module.exports = class Websocket {
                     });
             });
             this.on_disconnect(response => {
-                this.broadcast(response.id, 'disconnection_broadcast', {user: response.user});
-                this.emit(response.id, 'disconnection', {user: response.user});
+                this.sequelize.authenticate().then(() => this.database.Discussion.findOne({where: {id: response.discussion.id}}))
+                    .then(discussion => discussion.JSON)
+                    .then(json => {
+                        this.broadcast(response.id, 'disconnection_broadcast', {user: response.user, discussion: json});
+                        this.emit(response.id, 'disconnection', {user: response.user, discussion: json});
+                    });
             });
             this.on_user_write(({id, discussion, user}) => {
                 this.broadcast(id, 'user_write', {user, discussion});
