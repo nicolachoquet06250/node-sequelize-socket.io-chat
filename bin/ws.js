@@ -33,6 +33,13 @@ const ws_conf = {
         return ws_conf;
     },
     save_client: () => ws_conf.server.sockets.rooms.push(ws_conf.client),
+    save_user: (user, client) => {
+        for(let room_id in ws_conf.server.sockets.rooms) {
+            if(ws_conf.server.sockets.rooms[room_id].id === client.id) {
+                ws_conf.server.sockets.rooms[room_id].user = user;
+            }
+        }
+    },
     unSave_client: id => {
         for(let i in ws_conf.server.sockets.rooms) {
             if(ws_conf.server.sockets.rooms[i].id === id) {
@@ -61,6 +68,7 @@ const ws_conf = {
         ws_conf.broadcast(id, 'welcome_broadcast', {user, discussion})
     },
 
+    on_save_user: callback => ws_conf.client.on('save_user', callback),
     on_new_discussion: callback => ws_conf.client.on('new_discussion', callback),
     on_new_message: callback => ws_conf.client.on('new_message', callback),
     on_get_discussion: callback => ws_conf.client.on('get_discussion', callback),
@@ -72,6 +80,7 @@ const ws_conf = {
         ws_conf.init(http_server);
         ws_conf.server.on('connection', client => {
             ws_conf.init_client(client);
+            ws_conf.on_save_user(({user}) => ws_conf.save_user(user, ws_conf.client));
             ws_conf.on_new_message(({id, discussion, author, message}) => {
                 sequelize.authenticate().then(() => db.Message.create({text: message, author: author.id, discussion: discussion.id}))
                     .then(message => message.JSON)
@@ -123,13 +132,16 @@ const ws_conf = {
             ws_conf.on_disconnect(response => {
                 ws_conf.broadcast(response.id, 'disconnection_broadcast', {user: response.user});
                 ws_conf.emit(response.id, 'disconnection', {user: response.user});
-                // ws_conf.unSave_client(id);
             });
             ws_conf.on_user_write(({id, discussion, user}) => {
                 ws_conf.broadcast(id, ws_conf.WRITING_CHANNELS.is, {user, discussion});
             });
             ws_conf.on_user_stop_write(({id, discussion, user}) => {
                 ws_conf.broadcast(id, ws_conf.WRITING_CHANNELS.not, {user, discussion});
+            });
+            ws_conf.client.on('disconnect', () => {
+                ws_conf.broadcast(ws_conf.client.id, 'disconnection_broadcast', {user: JSON.parse(ws_conf.get_client(client.id).user)});
+                ws_conf.unSave_client(client.id);
             });
         });
     }

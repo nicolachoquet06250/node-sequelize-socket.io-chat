@@ -77,20 +77,22 @@ const pages_script = {
 
             (function definitionDesEcouteursDEvenementsSockets() {
                 server.save_client();
+                server.save_user();
                 server.on_new_discussion(response => {
                     if(response.created)
                         add_discussion_to_list(response.discussion);
                 });
-                server.on_new_discussion_broadcast(({discussions}) => {
-                    for(let discussion of discussions)
+                server.on_new_discussion_broadcast(response => {
+                    discussions.innerHTML = '';
+                    for(let discussion of response.discussions)
                         add_discussion_to_list(discussion);
                 });
                 server.on_welcome(response => {
                     add_message_to_list(`Vous êtes bien connecté !`, {first_name: 'Serveur'}, false)
                 });
                 server.on_welcome_broadcast(response => {
-                    console.log('broadcast');
-                    add_message_to_list(`L'utilisateur ${response.user.first_name} s'est connecté !`, {first_name: 'Serveur'}, false)
+                    if(response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
+                        add_message_to_list(`L'utilisateur ${response.user.first_name} s'est connecté !`, {first_name: 'Serveur'}, false)
                 });
                 server.on_get_discussion(response => {
                     if(!response.error)
@@ -144,7 +146,7 @@ const pages_script = {
                 add_new_discussion.addEventListener('click', () => {
                     let discussion_name = prompt('Quel est le nom de votre discussion ?');
                     if(discussion_name !== '')
-                        server.emit('new_channel', {id: server.id, name: discussion_name});
+                        server.emit('new_discussion', {id: server.id, discussion: {name: discussion_name}});
                 });
             })();
 

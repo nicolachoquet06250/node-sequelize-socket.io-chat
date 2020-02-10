@@ -6,8 +6,7 @@
     "build": "babel public/javascripts/src -d public/javascripts/dest",
     "fake-init": "node modules/sequelize/fake_datas/index.js",
     "prestart": "xcopy \"node_modules/socket.io-client\" \"public/javascripts/socket.io-client\" /E",
-    "start": "nodemon ./bin/www",
-    "autostart": "cp node_modules/socket.io-client public/javascripts/socket.io-client;nodemon ./bin/www",
+    "start": "node ./bin/www",
     "migrate": "npx sequelize-cli db:migrate"
   },
   "dependencies": {

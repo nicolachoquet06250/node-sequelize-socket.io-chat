@@ -63,6 +63,10 @@ class Socket {
             this.id = id;
         })
     }
+    save_user() {
+        let user = localStorage.getItem('user');
+        this.emit('save_user', {user});
+    }
 
     on_catch_welcome(discussion, callback) {
         this.socket.on(`${discussion}_welcome`, callback);

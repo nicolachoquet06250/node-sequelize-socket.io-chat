@@ -5,7 +5,7 @@ const credentials = {
     username: 'nchoquet',
     password: 'nchoquet',
     hostname: 'localhost',
-    port: 3306,
+    port: 3307,
     database: 'sequelize'
 };
 
