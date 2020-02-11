@@ -12,7 +12,7 @@ class Script {
         };
 
         ask_notification_permission_if_not()
-            .then(status => Notification.permission = Notification.permission !== status ? status : Notification.permission)
+            .then(status => console.log(Notification.permission, status)/*Notification.permission = Notification.permission !== status ? status : Notification.permission*/)
             .catch(err => alert(err.message));
 
         return {
@@ -27,7 +27,7 @@ class Script {
     }
 
     get notification() {
-        if(this._notification === null || this._notification === undefined) {
+        if(this._notification === undefined) {
             this._notification = new this.Notification();
         }
         return this._notification;
@@ -44,7 +44,7 @@ class Script {
         if(user !== undefined && user !== null) {
             user = JSON.parse(user);
             const my_name = user.first_name;
-            var server = new Socket('ws://localhost:3001/', my_name);
+            var server = new Socket(`ws://${window.location.host}/`, my_name);
             let script = this;
 
             let messages = document.querySelector('.messages');
@@ -69,19 +69,25 @@ class Script {
             const add_message_to_list = (message, me) => {
                 let date = new Date();
                 let isToday = true;
+                let isYesterday = false;
+                let isTwoDaysAgo = false;
+                let dateToWrite = null;
                 if(message.createdAt) {
                     let _date = new Date();
                     date = new Date(message.createdAt);
                     isToday = date.getDate() === _date.getDate() && date.getMonth() === _date.getMonth() && date.getFullYear() === _date.getFullYear();
+                    isYesterday = date.getDate() - 1 === _date.getDate() && date.getMonth() === _date.getMonth() && date.getFullYear() === _date.getFullYear();
+                    isTwoDaysAgo = date.getDate() - 2 === _date.getDate() && date.getMonth() === _date.getMonth() && date.getFullYear() === _date.getFullYear();
                 }
+                if(isToday) dateToWrite = 'Aujourd\'hui';
+                else if(isYesterday) dateToWrite = 'Hier';
+                else if(isTwoDaysAgo) dateToWrite = 'Il y a 2 jours';
+                dateToWrite = (dateToWrite === null ? `Le ${date.getDate() > 9 ? date.getDate() : '0' + date.getDate()}/${date.getMonth() > 9 ? date.getMonth() : '0' + date.getMonth()}/${date.getFullYear()}` : dateToWrite) + ` à ${date.getHours() > 9 ? date.getHours() : '0' + date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}`;
+
                 let complete_name = message.author.first_name + (message.author.last_name ? ' ' + message.author.last_name : '');
-                let classes = ' mdl-cell--12-col';
-                if(me) {
-                    classes = ' mdl-cell--10-col mdl-cell--2-offset';
-                }
                 let side = me ? 'right' : 'left';
-                let template = `<div class="mdl-grid">
-                <div class="mdl-cell${classes}">
+                let template = `<div class="mdl-grid" id="message-${message.discussion}-${date.toISOString().replace(/[:.]/g, '-')}">
+                <div class="mdl-cell mdl-cell--12-col">
                     <div class="bubble ${side} mdl-card mdl-shadow--2dp" style="float: ${side}">
                         <div class="mdl-card__title mdl-card--expand mdl-grid" 
                              style="background-image: url('${message.author.avatar ? message.author.avatar : '/images/messenger.png'}');">
@@ -90,8 +96,7 @@ class Script {
                             </div>
                             <div class="mdl-cell mdl-cell--6-col mdl-cell--bottom">
                                 <i class="mdl-card__description-text">
-                                    ${isToday ? 'Aujourd\'hui' 
-                    : `Le ${date.getDate() > 9 ? date.getDate() : '0' + date.getDate()}/${date.getMonth() > 9 ? date.getMonth() : '0' + date.getMonth()}/${date.getFullYear()}`} à ${date.getHours() > 9 ? date.getHours() : '0' + date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}
+                                    ${dateToWrite}
                                 </i>
                             </div>
                         </div>
@@ -110,6 +115,7 @@ class Script {
                 </div>
             </div>`;
                 messages.innerHTML += template;
+                return document.querySelector(`#message-${message.discussion}-${date.toISOString().replace(/[:.]/g, '-')}`);
             };
             const select_discussion = id => {
                 for(let d of document.querySelectorAll(`.discussions .mdl-navigation__link`)) {
@@ -156,8 +162,13 @@ class Script {
                 document.querySelector('.discussion-description').innerHTML = `Bienvenue dans la discussion nommée ${discussion.name}.<br />
                 Tous les inscrit peuvent participer à n'importe quelle conversation.`;
                 messages.innerHTML = '';
+                let last_message = null;
                 for(let message of discussion.messages)
-                    add_message_to_list(message, user.id === message.author.id);
+                    last_message = add_message_to_list(message, user.id === message.author.id);
+
+                if(last_message) {
+                    window.location.hash = `#${last_message.getAttribute('id')}`;
+                }
 
                 message_form.show();
                 select_discussion(discussion.id);
@@ -213,14 +224,22 @@ class Script {
                         script.initAccordionSizes();
                     });
                     server.on_welcome(response => {
-                        add_message_to_list({
+                        let message = add_message_to_list({
                             text: `Vous êtes bien connecté !`,
+                            discussion: parseInt(localStorage.getItem('current_discussion')),
                             author: {first_name: 'Serveur'}
-                        }, false)
+                        }, false);
+                        window.location.hash = `#${message.getAttribute('id')}`;
                     });
                     server.on_welcome_broadcast(response => {
-                        if(response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
-                            add_message_to_list({text: `L'utilisateur ${response.user.first_name} s'est connecté !`, author: {first_name: 'Serveur'}}, false);
+                        if(response.discussion.id === parseInt(localStorage.getItem('current_discussion'))) {
+                            let message = add_message_to_list({
+                                text: `L'utilisateur ${response.user.first_name} s'est connecté !`,
+                                discussion: parseInt(localStorage.getItem('current_discussion')),
+                                author: {first_name: 'Serveur'}
+                            }, false);
+                            window.location.hash = `#${message.getAttribute('id')}`;
+                        }
                         else
                             script.notification.push('Message du Serveur', {
                                 dir: 'ltr',
@@ -235,11 +254,14 @@ class Script {
                         script.initAccordionSizes();
                     });
                     server.on_new_message(({message}) => {
-                        add_message_to_list(message, true);
+                        let last_message = add_message_to_list(message, true);
+                        window.location.hash = `#${last_message.getAttribute('id')}`;
                     });
                     server.on_new_message_broadcast(({message, discussion}) => {
-                        if(message.discussion === parseInt(localStorage.getItem('current_discussion')))
-                            add_message_to_list(message, false);
+                        if(message.discussion === parseInt(localStorage.getItem('current_discussion'))) {
+                            let last_message = add_message_to_list(message, false);
+                            window.location.hash = `#${last_message.getAttribute('id')}`;
+                        }
                         else
                             script.notification.push(`Message de ${message.author.first_name} ${message.author.last_name}`, {
                                 dir: 'ltr',
@@ -250,10 +272,15 @@ class Script {
                     });
                     server.on_disconnect(quit_discussion);
                     server.on_disconnect_broadcast(({discussion, user: {first_name}}) => {
-                        console.log(discussion, first_name);
                         if(discussion !== undefined) {
-                            if(discussion.id === parseInt(localStorage.getItem('current_discussion')))
-                                add_message_to_list({text: `L'utilisateur ${first_name} s'est déconnecté !`, author: {first_name: 'Serveur'}}, false);
+                            if(discussion.id === parseInt(localStorage.getItem('current_discussion'))) {
+                                let last_message = add_message_to_list({
+                                    text: `L'utilisateur ${first_name} s'est déconnecté !`,
+                                    discussion: parseInt(localStorage.getItem('current_discussion')),
+                                    author: {first_name: 'Serveur'}
+                                }, false);
+                                window.location.hash = `#${last_message.getAttribute('id')}`;
+                            }
                             else {
                                 script.notification.push('Message du Serveur', {
                                     dir: 'ltr',
@@ -271,7 +298,11 @@ class Script {
                                     icon: '/images/messenger.png'
                                 });
                             else
-                                add_message_to_list({text: `L'utilisateur ${first_name} s'est déconnecté !`, author: {first_name: 'Serveur'}}, false);
+                                add_message_to_list({
+                                    text: `L'utilisateur ${first_name} s'est déconnecté !`,
+                                    discussion: parseInt(localStorage.getItem('current_discussion')),
+                                    author: {first_name: 'Serveur'}
+                                }, false);
                         }
                     });
                     server.on_user_write(response => {
@@ -324,11 +355,11 @@ class Script {
             })();
 
             (function definitionDeLEcouteurDEvenementsPourSavoirQuandQuelquUnEstEnTrainDEcrire() {
-                    message.addEventListener('keyup', () =>
-                        message.value.length > 1
-                            ? server.emit('user_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}})
-                            : server.emit('user_stop_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}}));
-                })();
+                message.addEventListener('keyup', () =>
+                    message.value.length > 1
+                        ? server.emit('user_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}})
+                        : server.emit('user_stop_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}}));
+            })();
 
             (function definitionDesActionsAuChargementDeLaPage() {
                 message_form.hide();

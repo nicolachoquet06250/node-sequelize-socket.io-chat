@@ -178,7 +178,6 @@ module.exports = class Websocket {
                 this.broadcast(id, 'user_stop_write', {user, discussion});
             });
             this.client.on('disconnect', () => {
-                console.log('disconnection_broadcast', client.id, this.get_client(client.id).user);
                 this.broadcast(client.id, 'disconnection_broadcast', {
                     user: JSON.parse(this.get_client(client.id).user)
                 });
