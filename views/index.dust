@@ -14,7 +14,7 @@
     <script src="/javascripts/dest/Socket.js"></script>
     <script src="/javascripts/dest/Script.js"></script>
     <style>
-        .demo-layout-waterfall .mdl-layout__header-row .mdl-navigation__link:last-of-type  {
+        .messenger-layout .mdl-layout__header-row .mdl-navigation__link:last-of-type  {
             padding-right: 0;
         }
         .mdl-navigation__link.is-active {
@@ -71,11 +71,34 @@
         .mdl-accordion.mdl-accordion--opened .mdl-accordion__content {
             margin-top: 0 !important;
         }
+
+        .discussion-header.mdl-card {
+            width: 100%;
+        }
+        .discussion-header > .mdl-card__title {
+            color: #fff;
+            height: 176px;
+            background: url('/images/messenger.png') center / cover;
+        }
+        .discussion-header > .mdl-card__menu {
+            color: #fff;
+        }
+
+        .bubble.right.mdl-card, .bubble.left.mdl-card {
+            width: 320px;
+            height: 320px;
+        }
+        .bubble.right > .mdl-card__title, .bubble.left > .mdl-card__title {
+            color: #000000;
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+        }
     </style>
 </head>
 <body>
 
-<div class="demo-layout-waterfall mdl-layout mdl-js-layout">
+<div class="messenger-layout mdl-layout mdl-js-layout">
     <header class="mdl-layout__header mdl-layout__header--waterfall">
         <!-- Top row, always visible -->
         <div class="mdl-layout__header-row">
@@ -100,6 +123,7 @@
             <nav class="mdl-navigation discussions"></nav>
         </div>
     </header>
+
     <div class="mdl-layout__drawer">
         <span class="mdl-layout-title">{title}</span>
         <nav class="mdl-navigation">
@@ -129,35 +153,49 @@
             </div>
         </nav>
     </div>
-    <main class="mdl-layout__content">
-        <div class="page-content">
-            <h3 class="discussion-title"></h3>
-            <ul class="messages"></ul>
-            <p class="is_writing"></p>
-            <textarea class="message" placeholder="Votre message ici..."></textarea>
-            <br />
-            <p class="message-info"></p>
-            <br />
-            <button type="button" class="send">Envoyer</button>
-            <button type="button" class="disconnect">Sortir de la discussion</button>
-        </div>
-    </main>
-</div>
 
-    <!--<h1>{title}</h1>
-    <p>Welcome to {title}</p>
-    <h3>Discussions</h3>
-    <ul class="discussions"></ul>
-    <h3 class="discussion-title"></h3>
-    <ul class="messages"></ul>
-    <p class="is_writing"></p>
-    <textarea class="message" placeholder="Votre message ici..."></textarea>
-    <br />
-    <p class="message-info"></p>
-    <br />
-    <button type="button" class="send">Envoyer</button>
-    <button type="button" class="disconnect">Déconnexion</button>
-    <button type="button" class="add-new-discussion">Nouvelle discussion</button>-->
+    <main class="mdl-layout__content">
+        <div class="discussion-header mdl-card mdl-shadow--2dp">
+            <div class="mdl-card__title">
+                <h2 class="mdl-card__title-text discussion-title"></h2>
+            </div>
+            <div class="mdl-card__supporting-text discussion-description"></div>
+        </div>
+
+        <div class="page-content messages"></div>
+    </main>
+    <footer class="mdl-mega-footer">
+        <div class="mdl-cell mdl-cell--12-col mdl-cell--4-col-phone mdl-cell--4-col-tablet mdl-cell--4-col-desktop mdl-cell--4-offset-phone mdl-cell--4-offset-tablet mdl-cell--4-offset-desktop" style="text-align: center;">
+            <form action="#" class="message-form">
+                <div class="mdl-textfield mdl-js-textfield">
+                    <textarea class="mdl-textfield__input message" rows="5" id="sample5" ></textarea>
+                    <label class="mdl-textfield__label" for="sample5" style="color: white;">Text lines...</label>
+                </div>
+                <br />
+                <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--icon send">
+                    <i class="material-icons">send</i>
+                </button>
+                <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--icon disconnect">
+                    <i class="material-icons">settings_power</i>
+                </button>
+                <p class="message-info"></p>
+            </form>
+        </div>
+
+        <div class="mdl-mega-footer__bottom-section">
+            <div class="mdl-logo">Messenger</div>
+            <ul class="mdl-mega-footer__link-list">
+                <li><a href="#">Help</a></li>
+                <li><a href="#">Privacy & Terms</a></li>
+            </ul>
+        </div>
+    </footer>
+
+    <div class="mdl-js-snackbar mdl-snackbar notification-toast">
+        <div class="mdl-snackbar__text"></div>
+        <button class="mdl-snackbar__action" type="button"></button>
+    </div>
+</div>
 </body>
 <script>var PAGE = 'index';</script>
 <script src="/javascripts/dest/load_page_script.js"></script>

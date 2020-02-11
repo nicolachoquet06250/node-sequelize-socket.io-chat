@@ -10,6 +10,11 @@ class Authors extends Observable {
             authors = _new[0] + (_new.length === 2 ? ' et ' + _new[1] : '');
         else if(_new.length > 2)
             authors = _new[0] + ', ' + _new[1] + ', etc';
-        document.querySelector('.is_writing').innerHTML = authors === '' ? '' : authors + ' ' + (_new.length >= 2 ? 'sont' : 'est') + ' en train d\'écrire ...';
+        if(authors !== '') {
+            document.querySelector('.notification-toast').MaterialSnackbar.showSnackbar({
+                message: authors === '' ? '' : authors + ' ' + (_new.length >= 2 ? 'sont' : 'est') + ' en train d\'écrire ...'
+            });
+        }
+        // document.querySelector('.is_writing').innerHTML = authors === '' ? '' : authors + ' ' + (_new.length >= 2 ? 'sont' : 'est') + ' en train d\'écrire ...';
     }
 }

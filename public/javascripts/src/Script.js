@@ -66,11 +66,49 @@ class Script {
                     }, user
                 });
             };
-            const add_message_to_list = (msg, author, me) => {
-                let message_li = document.createElement('li');
-                message_li.classList.add(me ? 'right' : 'left');
-                message_li.innerHTML = (me ? 'Moi' : author.first_name) + ': ' + msg;
-                messages.appendChild(message_li);
+            const add_message_to_list = (message, me) => {
+                let date = new Date();
+                let isToday = true;
+                if(message.createdAt) {
+                    let _date = new Date();
+                    date = new Date(message.createdAt);
+                    isToday = date.getDate() === _date.getDate() && date.getMonth() === _date.getMonth() && date.getFullYear() === _date.getFullYear();
+                }
+                let complete_name = message.author.first_name + (message.author.last_name ? ' ' + message.author.last_name : '');
+                let right_message_classes = '';
+                if(me) {
+                    right_message_classes = ' mdl-cell--11-col-phone mdl-cell--8-col-tablet mdl-cell--3-col-desktop mdl-cell--1-offset-phone mdl-cell--4-offset-tablet mdl-cell--9-offset-desktop';
+                }
+                let template = `<div class="mdl-grid">
+                <div class="mdl-cell mdl-cell--12-col${right_message_classes}">
+                    <div class="bubble ${me ? 'right' : 'left'} mdl-card mdl-shadow--2dp">
+                        <div class="mdl-card__title mdl-card--expand mdl-grid" 
+                             style="background-image: url('${message.author.avatar ? message.author.avatar : '/images/messenger.png'}');">
+                            <div class="mdl-cell mdl-cell--6-col mdl-cell--bottom">
+                                <h2 class="mdl-card__title-text">${complete_name}</h2>
+                            </div>
+                            <div class="mdl-cell mdl-cell--6-col mdl-cell--bottom">
+                                <i class="mdl-card__description-text">
+                                    ${isToday ? 'Aujourd\'hui' 
+                    : `Le ${date.getDate() > 9 ? date.getDate() : '0' + date.getDate()}/${date.getMonth() > 9 ? date.getMonth() : '0' + date.getMonth()}/${date.getFullYear()}`} à ${date.getHours() > 9 ? date.getHours() : '0' + date.getHours()}:${date.getMinutes() > 9 ? date.getMinutes() : '0' + date.getMinutes()}
+                                </i>
+                            </div>
+                        </div>
+                        <div class="mdl-card__supporting-text">
+                            ${message.text.replace(/\n/g, '<br />')}
+                        </div>
+                        <div class="mdl-card__actions mdl-card--border">
+                            <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+                                <i class="material-icons">exposure_plus_1</i>
+                            </button>
+                            <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--icon">
+                                <i class="material-icons">exposure_neg_1</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+                messages.innerHTML += template;
             };
             const select_discussion = id => {
                 for(let d of document.querySelectorAll(`.discussions .mdl-navigation__link`)) {
@@ -78,6 +116,13 @@ class Script {
                         if(parseInt(d.getAttribute('data-id')) === parseInt(id))
                             d.classList.add('is-active');
                         else
+                            d.classList.remove('is-active');
+                }
+            };
+            const unselect_discussion = id => {
+                for(let d of document.querySelectorAll(`.discussions .mdl-navigation__link`)) {
+                    if(d.hasAttribute('data-id'))
+                        if(parseInt(d.getAttribute('data-id')) === parseInt(id))
                             d.classList.remove('is-active');
                 }
             };
@@ -106,10 +151,12 @@ class Script {
                 }
             };
             const load_discussion = discussion => {
-                document.querySelector('.discussion-title').innerHTML = `Messages de '${discussion.name}'`;
+                document.querySelector('.discussion-title').innerHTML = discussion.name;
+                document.querySelector('.discussion-description').innerHTML = `Bienvenue dans la discussion nommée ${discussion.name}.<br />
+                Tous les inscrit peuvent participer à n'importe quelle conversation.`;
                 messages.innerHTML = '';
                 for(let message of discussion.messages)
-                    add_message_to_list(message.text, message.author, user.id === message.author.id);
+                    add_message_to_list(message, user.id === message.author.id);
 
                 message_form.show();
                 select_discussion(discussion.id);
@@ -139,18 +186,12 @@ class Script {
             };
             const message_form = {
                 show() {
-                    disconnect_button.style.display = 'initial';
-                    send_button.style.display = 'initial';
-                    document.querySelector('.is_writing').style.display = 'initial';
-                    document.querySelector('.message-info').style.display = 'initial';
-                    message.style.display = 'initial';
+                    document.querySelector('.discussion-header').style.display = 'initial';
+                    document.querySelector('.message-form').style.display = 'initial';
                 },
                 hide() {
-                    disconnect_button.style.display = 'none';
-                    send_button.style.display = 'none';
-                    document.querySelector('.is_writing').style.display = 'none';
-                    document.querySelector('.message-info').style.display = 'none';
-                    message.style.display = 'none';
+                    document.querySelector('.discussion-header').style.display = 'none';
+                    document.querySelector('.message-form').style.display = 'none';
                 }
             };
 
@@ -171,11 +212,14 @@ class Script {
                         script.initAccordionSizes();
                     });
                     server.on_welcome(response => {
-                        add_message_to_list(`Vous êtes bien connecté !`, {first_name: 'Serveur'}, false)
+                        add_message_to_list({
+                            text: `Vous êtes bien connecté !`,
+                            author: {first_name: 'Serveur'}
+                        }, false)
                     });
                     server.on_welcome_broadcast(response => {
                         if(response.discussion.id === parseInt(localStorage.getItem('current_discussion')))
-                            add_message_to_list(`L'utilisateur ${response.user.first_name} s'est connecté !`, {first_name: 'Serveur'}, false)
+                            add_message_to_list({text: `L'utilisateur ${response.user.first_name} s'est connecté !`, author: {first_name: 'Serveur'}}, false);
                         else
                             script.notification.push('Message du Serveur', {
                                 dir: 'ltr',
@@ -190,11 +234,11 @@ class Script {
                         script.initAccordionSizes();
                     });
                     server.on_new_message(({message}) => {
-                        add_message_to_list(message.text, message.author, true);
+                        add_message_to_list(message, true);
                     });
                     server.on_new_message_broadcast(({message, discussion}) => {
                         if(message.discussion === parseInt(localStorage.getItem('current_discussion')))
-                            add_message_to_list(message.text, message.author, false);
+                            add_message_to_list(message, false);
                         else
                             script.notification.push(`Message de ${message.author.first_name} ${message.author.last_name}`, {
                                 dir: 'ltr',
@@ -208,7 +252,7 @@ class Script {
                         console.log(discussion, first_name);
                         if(discussion !== undefined) {
                             if(discussion.id === parseInt(localStorage.getItem('current_discussion')))
-                                add_message_to_list(`L'utilisateur ${first_name} s'est déconnecté !`, {first_name: 'Serveur'}, false);
+                                add_message_to_list({text: `L'utilisateur ${first_name} s'est déconnecté !`, author: {first_name: 'Serveur'}}, false);
                             else {
                                 script.notification.push('Message du Serveur', {
                                     dir: 'ltr',
@@ -226,7 +270,7 @@ class Script {
                                     icon: '/images/messenger.png'
                                 });
                             else
-                                add_message_to_list(`L'utilisateur ${first_name} s'est déconnecté !`, {first_name: 'Serveur'}, false);
+                                add_message_to_list({text: `L'utilisateur ${first_name} s'est déconnecté !`, author: {first_name: 'Serveur'}}, false);
                         }
                     });
                     server.on_user_write(response => {
@@ -259,12 +303,14 @@ class Script {
                     message.value = '';
                 });
                 disconnect_button.addEventListener('click', () => {
-                    server.emit('disconnection', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
-                    server.emit('user_stop_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
+                    let current_discussion = parseInt(localStorage.getItem('current_discussion'));
+                    unselect_discussion(current_discussion);
+                    server.emit('disconnection', {id: server.id, user, discussion: {id: current_discussion}});
+                    server.emit('user_stop_write', {id: server.id, user, discussion: {id: current_discussion}});
                 });
                 add_new_discussion.addEventListener('click', () => {
                     let discussion_name = prompt('Quel est le nom de votre discussion ?');
-                    if(discussion_name !== '')
+                    if(discussion_name)
                         server.emit('new_discussion', {id: server.id, discussion: {name: discussion_name}});
                 });
 
@@ -284,6 +330,7 @@ class Script {
                 })();
 
             (function definitionDesActionsAuChargementDeLaPage() {
+                message_form.hide();
                 init_discussions();
                 script.initAccordionSizes();
             })();
