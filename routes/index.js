@@ -6,7 +6,7 @@ const db = require('../models');
 // PAGES
 router.get('/', (req, res) => {
   sequelize.authenticate().then(() => {
-    res.render('index', { title: 'Succès Express' });
+    res.render('index', { title: 'Messenger' });
   }).catch(err => {
     console.log(err);
     res.render('error', { message: 'Erreur Express', status: err.status, stack: err.stack });

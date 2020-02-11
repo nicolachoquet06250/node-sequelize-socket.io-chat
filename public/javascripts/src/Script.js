@@ -33,6 +33,12 @@ class Script {
         return this._notification;
     }
 
+    initAccordionSizes() {
+        document.querySelectorAll('.mdl-accordion__content').forEach(accordion => {
+            accordion.style.marginTop = '-' + accordion.offsetHeight.toString() + 'px';
+        });
+    }
+
     index() {
         let user = localStorage.getItem('user');
         if(user !== undefined && user !== null) {
@@ -42,7 +48,7 @@ class Script {
             let script = this;
 
             let messages = document.querySelector('.messages');
-            let discussions = document.querySelector('.discussions');
+            let discussions = document.querySelectorAll('.discussions');
             let message = document.querySelector('.message');
             let send_button = document.querySelector('.send');
             let disconnect_button = document.querySelector('.disconnect');
@@ -66,20 +72,38 @@ class Script {
                 message_li.innerHTML = (me ? 'Moi' : author.first_name) + ': ' + msg;
                 messages.appendChild(message_li);
             };
+            const select_discussion = id => {
+                for(let d of document.querySelectorAll(`.discussions .mdl-navigation__link`)) {
+                    if(d.hasAttribute('data-id'))
+                        if(parseInt(d.getAttribute('data-id')) === parseInt(id))
+                            d.classList.add('is-active');
+                        else
+                            d.classList.remove('is-active');
+                }
+            };
             const add_discussion_to_list = discussion => {
-                let discussion_li = document.createElement('li');
-                discussion_li.innerHTML = discussion.name;
-                discussion_li.style.cursor = 'pointer';
-                discussion_li.addEventListener('click', () => {
-                    server.emit('get_discussion', {
-                        id: server.id,
-                        discussion: {
-                            id: discussion.id
-                        }, user
+                const get_discussion_item = () => {
+                    let discussion_a = document.createElement('a');
+                    discussion_a.innerHTML = discussion.name;
+                    discussion_a.style.cursor = 'pointer';
+                    discussion_a.setAttribute('data-id', discussion.id);
+                    discussion_a.classList.add('mdl-navigation__link');
+                    discussion_a.addEventListener('click', () => {
+                        server.emit('get_discussion', {
+                            id: server.id,
+                            discussion: {
+                                id: discussion.id
+                            }, user
+                        });
+                        select_discussion(discussion.id);
+                        save_current_discussion(discussion);
                     });
-                    save_current_discussion(discussion);
-                });
-                discussions.appendChild(discussion_li);
+                    return discussion_a;
+                };
+
+                for(let d of discussions) {
+                    d.appendChild(get_discussion_item());
+                }
             };
             const load_discussion = discussion => {
                 document.querySelector('.discussion-title').innerHTML = `Messages de '${discussion.name}'`;
@@ -87,12 +111,16 @@ class Script {
                 for(let message of discussion.messages)
                     add_message_to_list(message.text, message.author, user.id === message.author.id);
 
+                message_form.show();
+                select_discussion(discussion.id);
                 save_current_discussion(discussion);
             };
             const quit_discussion = () => {
                 messages.innerHTML = '';
                 document.querySelector('.discussion-title').innerHTML = '';
                 localStorage.removeItem('current_discussion');
+
+                message_form.hide();
             };
             const init_discussions = () => {
                 fetch('/api/discussions', {
@@ -109,6 +137,22 @@ class Script {
                         get_current_discussion();
                     })
             };
+            const message_form = {
+                show() {
+                    disconnect_button.style.display = 'initial';
+                    send_button.style.display = 'initial';
+                    document.querySelector('.is_writing').style.display = 'initial';
+                    document.querySelector('.message-info').style.display = 'initial';
+                    message.style.display = 'initial';
+                },
+                hide() {
+                    disconnect_button.style.display = 'none';
+                    send_button.style.display = 'none';
+                    document.querySelector('.is_writing').style.display = 'none';
+                    document.querySelector('.message-info').style.display = 'none';
+                    message.style.display = 'none';
+                }
+            };
 
             (function definitionDesEcouteursDEvenementsSockets() {
                     server.save_client();
@@ -116,11 +160,15 @@ class Script {
                     server.on_new_discussion(response => {
                         if(response.created)
                             add_discussion_to_list(response.discussion);
+                        script.initAccordionSizes();
                     });
                     server.on_new_discussion_broadcast(response => {
-                        discussions.innerHTML = '';
+                        for(let d of discussions) {
+                            d.innerHTML ='';
+                        }
                         for(let discussion of response.discussions)
                             add_discussion_to_list(discussion);
+                        script.initAccordionSizes();
                     });
                     server.on_welcome(response => {
                         add_message_to_list(`Vous êtes bien connecté !`, {first_name: 'Serveur'}, false)
@@ -139,6 +187,7 @@ class Script {
                     server.on_get_discussion(response => {
                         if(!response.error)
                             load_discussion(response.discussion);
+                        script.initAccordionSizes();
                     });
                     server.on_new_message(({message}) => {
                         add_message_to_list(message.text, message.author, true);
@@ -191,34 +240,41 @@ class Script {
                 })();
 
             (function definitionDesClicksSurLesBoutons() {
-                    send_button.addEventListener('click', () => {
-                        server.emit('user_stop_write', {
-                            id: server.id,
-                            user: user,
-                            discussion: {
-                                id: parseInt(localStorage.getItem('current_discussion'))
-                            }
+                send_button.addEventListener('click', () => {
+                    server.emit('user_stop_write', {
+                        id: server.id,
+                        user: user,
+                        discussion: {
+                            id: parseInt(localStorage.getItem('current_discussion'))
+                        }
+                    });
+                    server.emit('new_message', {
+                        id: server.id,
+                        discussion: {
+                            id: parseInt(localStorage.getItem('current_discussion'))
+                        },
+                        author: user,
+                        message: message.value
+                    });
+                    message.value = '';
+                });
+                disconnect_button.addEventListener('click', () => {
+                    server.emit('disconnection', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
+                    server.emit('user_stop_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
+                });
+                add_new_discussion.addEventListener('click', () => {
+                    let discussion_name = prompt('Quel est le nom de votre discussion ?');
+                    if(discussion_name !== '')
+                        server.emit('new_discussion', {id: server.id, discussion: {name: discussion_name}});
+                });
+
+                for(let accordion_button of document.querySelectorAll('.mdl-accordion__button')) {
+                        accordion_button.addEventListener('click', event => {
+                            if(event.target.tagName !== "I" || (event.target.tagName === "I" && event.target.classList.contains('mdl-accordion__icon')))
+                                accordion_button.parentNode.classList.toggle('mdl-accordion--opened');
                         });
-                        server.emit('new_message', {
-                            id: server.id,
-                            discussion: {
-                                id: parseInt(localStorage.getItem('current_discussion'))
-                            },
-                            author: user,
-                            message: message.value
-                        });
-                        message.value = '';
-                    });
-                    disconnect_button.addEventListener('click', () => {
-                        server.emit('disconnection', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
-                        server.emit('user_stop_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}});
-                    });
-                    add_new_discussion.addEventListener('click', () => {
-                        let discussion_name = prompt('Quel est le nom de votre discussion ?');
-                        if(discussion_name !== '')
-                            server.emit('new_discussion', {id: server.id, discussion: {name: discussion_name}});
-                    });
-                })();
+                    }
+            })();
 
             (function definitionDeLEcouteurDEvenementsPourSavoirQuandQuelquUnEstEnTrainDEcrire() {
                     message.addEventListener('keyup', () =>
@@ -229,6 +285,7 @@ class Script {
 
             (function definitionDesActionsAuChargementDeLaPage() {
                 init_discussions();
+                script.initAccordionSizes();
             })();
         } else window.location.href = '/login';
     }
