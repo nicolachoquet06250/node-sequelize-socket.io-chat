@@ -151,6 +151,7 @@
                     </div>
                 </div>
             </div>
+            <a href="/login" class="mdl-navigation__link">Se déconnecter</a>
         </nav>
     </div>
 
@@ -165,23 +166,24 @@
         <div class="page-content messages"></div>
     </main>
     <footer class="mdl-mega-footer">
-        <div class="mdl-cell mdl-cell--12-col mdl-cell--4-col-phone mdl-cell--4-col-tablet mdl-cell--4-col-desktop mdl-cell--4-offset-phone mdl-cell--4-offset-tablet mdl-cell--4-offset-desktop" style="text-align: center;">
-            <form action="#" class="message-form">
-                <div class="mdl-textfield mdl-js-textfield">
-                    <textarea class="mdl-textfield__input message" rows="5" id="sample5" ></textarea>
-                    <label class="mdl-textfield__label" for="sample5" style="color: white;">Text lines...</label>
-                </div>
-                <br />
-                <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--icon send">
-                    <i class="material-icons">send</i>
-                </button>
-                <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--icon disconnect">
-                    <i class="material-icons">settings_power</i>
-                </button>
-                <p class="message-info"></p>
-            </form>
+        <div class="mdl-grid">
+            <div class="mdl-cell mdl-cell--12-col mdl-cell--4-col mdl-cell-4-offset" style="text-align: center;">
+                <form action="#" class="message-form">
+                    <div class="mdl-textfield mdl-js-textfield">
+                        <textarea class="mdl-textfield__input message" rows="5" id="sample5" ></textarea>
+                        <label class="mdl-textfield__label" for="sample5" style="color: white;">Text lines...</label>
+                    </div>
+                    <br />
+                    <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--icon send">
+                        <i class="material-icons">send</i>
+                    </button>
+                    <button class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect mdl-button--icon disconnect">
+                        <i class="material-icons">settings_power</i>
+                    </button>
+                    <p class="message-info"></p>
+                </form>
+            </div>
         </div>
-
         <div class="mdl-mega-footer__bottom-section">
             <div class="mdl-logo">Messenger</div>
             <ul class="mdl-mega-footer__link-list">

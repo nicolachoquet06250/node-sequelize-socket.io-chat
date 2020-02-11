@@ -75,13 +75,14 @@ class Script {
                     isToday = date.getDate() === _date.getDate() && date.getMonth() === _date.getMonth() && date.getFullYear() === _date.getFullYear();
                 }
                 let complete_name = message.author.first_name + (message.author.last_name ? ' ' + message.author.last_name : '');
-                let right_message_classes = '';
+                let classes = ' mdl-cell--12-col';
                 if(me) {
-                    right_message_classes = ' mdl-cell--11-col-phone mdl-cell--8-col-tablet mdl-cell--3-col-desktop mdl-cell--1-offset-phone mdl-cell--4-offset-tablet mdl-cell--9-offset-desktop';
+                    classes = ' mdl-cell--10-col mdl-cell--2-offset';
                 }
+                let side = me ? 'right' : 'left';
                 let template = `<div class="mdl-grid">
-                <div class="mdl-cell mdl-cell--12-col${right_message_classes}">
-                    <div class="bubble ${me ? 'right' : 'left'} mdl-card mdl-shadow--2dp">
+                <div class="mdl-cell${classes}">
+                    <div class="bubble ${side} mdl-card mdl-shadow--2dp" style="float: ${side}">
                         <div class="mdl-card__title mdl-card--expand mdl-grid" 
                              style="background-image: url('${message.author.avatar ? message.author.avatar : '/images/messenger.png'}');">
                             <div class="mdl-cell mdl-cell--6-col mdl-cell--bottom">
@@ -356,10 +357,10 @@ class Script {
             }
         };
 
-        load_tab('connexion');
+        // load_tab('connexion');
 
         (function definitionDesSubmitSurLesFormulaires() {
-            const connexion_form = document.querySelector('.tabs .connexion form');
+            const connexion_form = document.querySelector('.connexion form');
             connexion_form.addEventListener('submit', e => {
                 e.preventDefault();
                 fetch(connexion_form.getAttribute('action'), {
@@ -382,7 +383,7 @@ class Script {
                 }).catch(err => document.querySelector('#message_connexion').innerHTML = err);
             });
 
-            const inscription_form = document.querySelector('.tabs .inscription form');
+            const inscription_form = document.querySelector('.inscription form');
             inscription_form.addEventListener('submit', e => {
                 e.preventDefault();
                 fetch(inscription_form.getAttribute('action'), {
@@ -391,8 +392,8 @@ class Script {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        first_name: inscription_form.querySelector('#firstname_connexion').value,
-                        last_name: inscription_form.querySelector('#lastname_connexion').value,
+                        first_name: inscription_form.querySelector('#firstname_inscription').value,
+                        last_name: inscription_form.querySelector('#lastname_inscription').value,
                         avatar: '',
                         email: inscription_form.querySelector('#email_inscription').value,
                         password: inscription_form.querySelector('#password_inscription').value
@@ -404,14 +405,14 @@ class Script {
                             user.error === undefined ? resolve(user) : reject(user.error)
                         )
                     )
-                    .then(() => load_tab('connexion'))
+                    // .then(() => load_tab('connexion'))
                     .catch(err => document.querySelector('#message_inscription').innerHTML = err)
             });
         })();
 
         (function definitionDesClicksSurLesBoutons() {
-            document.querySelector('.menu .connexion').addEventListener('click', () => load_tab('connexion'));
-            document.querySelector('.menu .inscription').addEventListener('click', () => load_tab('inscription'));
+            // document.querySelector('.menu .connexion').addEventListener('click', () => load_tab('connexion'));
+            // document.querySelector('.menu .inscription').addEventListener('click', () => load_tab('inscription'));
         })();
 
         (function definitionDesActionsAuChargementDeLaPage() {
