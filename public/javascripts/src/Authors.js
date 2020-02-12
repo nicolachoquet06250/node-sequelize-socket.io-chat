@@ -15,6 +15,5 @@ class Authors extends Observable {
                 message: authors === '' ? '' : authors + ' ' + (_new.length >= 2 ? 'sont' : 'est') + ' en train d\'écrire ...'
             });
         }
-        // document.querySelector('.is_writing').innerHTML = authors === '' ? '' : authors + ' ' + (_new.length >= 2 ? 'sont' : 'est') + ' en train d\'écrire ...';
     }
 }

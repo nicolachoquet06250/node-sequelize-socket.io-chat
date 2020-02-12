@@ -16,7 +16,15 @@ app.engine('dust', adaro.dust());
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'dust');
 
-app.use(logger('dev'));
+let logs_formats = [
+    'combined', 'common', 'default',
+    'short', 'tiny', 'dev',
+];
+
+let logs_format = process.env.LOGS_FORMAT;
+if(logs_formats.indexOf(logs_format) === -1) logs_format = 'common';
+
+app.use(logger(logs_format));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());

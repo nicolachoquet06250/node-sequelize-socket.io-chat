@@ -4,6 +4,8 @@
  * Module dependencies.
  */
 
+require('dotenv').config({path: __dirname + '/../.env'});
+
 var app = require('../app');
 var debug = require('debug')('sequelize-test:server');
 var http = require('http');
