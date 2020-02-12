@@ -8,6 +8,7 @@
     "prestart": "node bin/prestart.js",
     "start": "node ./bin/www",
     "preinstall": "node bin/preinstall.js",
+    "postinstall": "node bin/prestart.js",
     "migrate": "npx sequelize-cli db:migrate"
   },
   "dependencies": {
