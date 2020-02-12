@@ -10,5 +10,6 @@ DB_DATABASE=sequelize
 DB_HOST=mysql.host.com
 
 PORT=80
-LOGS_FORMAT=dev`, () => console.log('creation du ficher .env'));
+LOGS_FORMAT=dev
+AUTO_TRANSPILE=true`, () => console.log('creation du ficher .env'));
 }
