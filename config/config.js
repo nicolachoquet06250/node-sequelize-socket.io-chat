@@ -1,3 +1,6 @@
+
+require('dotenv').config({path: __dirname + '/../.env'});
+
 let node_env = process.env.NODE_ENV || 'development';
 let username = process.env.DB_USERNAME || 'nchoquet';
 let password = process.env.DB_PASSWORD || 'nchoquet';
