@@ -21,7 +21,7 @@ const messages = [
 sequelize.authenticate().then(() => {
     console.log('success !!');
     for(let user of users)
-        db.User.create({first_name: user.firstName, last_name: user.lastName, avatar: user.avatar})
+        db.User.create({first_name: user.firstName, last_name: user.lastName, avatar: user.avatar, email: user.email, password: user.password})
             .then(user => console.log(`L'utilisateur '${user.first_name} ${user.last_name}' à été créé !!`));
 
     for(let discussion of discussions)
