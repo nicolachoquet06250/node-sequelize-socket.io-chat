@@ -405,26 +405,6 @@ class Script {
     }
 
     login() {
-        const tabs = ['inscription', 'connexion'];
-        const load_tab = tab_id => {
-            function unselect_complete_tab(tab) {
-                document.querySelector(`.tabs .${tab}`).style.display = 'none';
-                document.querySelector(`.menu .${tab}`).classList.remove('active');
-            }
-            function select_complete_tab(tab) {
-                document.querySelector(`.tabs .${tab}`).style.display = 'block';
-                document.querySelector(`.menu .${tab}`).classList.add('active');
-            }
-
-            if(tabs.indexOf(tab_id.replace('.', '')) !== -1) {
-                for(let tab of tabs)
-                    unselect_complete_tab(tab);
-                select_complete_tab(tab_id);
-            }
-        };
-
-        // load_tab('connexion');
-
         (function definitionDesSubmitSurLesFormulaires() {
             const connexion_form = document.querySelector('.connexion form');
             connexion_form.addEventListener('submit', e => {
