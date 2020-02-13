@@ -12,12 +12,12 @@
     "migrate": "npx sequelize-cli db:migrate"
   },
   "dependencies": {
-    "@babel/cli": "^7.0.0-beta.41",
-    "@babel/core": "^7.0.0-beta.41",
+    "@babel/cli": "^7.8.4",
+    "@babel/core": "^7.8.4",
     "@babel/preset-env": "^7.8.4",
     "adaro": "~1.0.4",
-    "babel-cli": "~7.0.0-beta.3",
-    "babel-core": "~7.0.0-beta.3",
+    "babel-cli": "^7.0.0-alpha.20",
+    "babel-core": "^7.0.0-alpha.20",
     "babel-preset-env": "^1.7.0",
     "babel-preset-es2015": "^6.24.1",
     "cookie-parser": "~1.4.4",
