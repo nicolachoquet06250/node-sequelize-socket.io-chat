@@ -6,4 +6,6 @@ package-lock.json
 public/javascripts/socket.io-client/
 public/javascripts/socket.io-client/*
 public/javascripts/dest/*.js
+public/stylesheets/*.css
+public/stylesheets/*.css.map
 .env

@@ -9,94 +9,12 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-indigo.min.css" />
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-<!--    <link rel='stylesheet' href='/stylesheets/style.css'/>-->
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
     <script src="/javascripts/socket.io-client/dist/socket.io.js"></script>
     <script src="/javascripts/dest/Observable.js"></script>
     <script src="/javascripts/dest/Authors.js"></script>
     <script src="/javascripts/dest/Socket.js"></script>
     <script src="/javascripts/dest/Script.js"></script>
-    <style>
-        .messenger-layout .mdl-layout__header-row .mdl-navigation__link:last-of-type  {
-            padding-right: 0;
-        }
-        .mdl-navigation__link.is-active {
-            background-color:#e0e0e0;
-            color:#000
-        }
-        .mdl-layout__header-row .mdl-navigation__link.is-active, .mdl-layout__header-row .mdl-navigation__link:hover {
-            background: rgba(224,224,224, 0.5);
-        }
-        .mdl-layout__header-row .mdl-navigation__link:last-child {
-            padding-right: 24px!important;
-        }
-
-        .mdl-accordion {
-            cursor: pointer;
-        }
-        .mdl-accordion.mdl-accordion--opened {
-            border-top: 1px solid #e0e0e0;
-            border-bottom: 1px solid #e0e0e0;
-            margin-top: -1px;
-        }
-        .mdl-accordion.mdl-accordion--opened + .mdl-accordion.mdl-accordion--opened {
-            border-top: none;
-            margin-top: 0;
-        }
-        .mdl-accordion .mdl-accordion__content-wrapper {
-            overflow: hidden;
-        }
-        .mdl-accordion .mdl-accordion__content {
-            transition-property: margin-top;
-            transition-duration: 0.2s;
-        }
-        .mdl-accordion .add-new-discussion {
-            color: rgba(0, 0, 0, 0.3);
-            position: absolute;
-            right: 40px;
-            margin-top: -10px;
-        }
-        .mdl-accordion .mdl-accordion__icon {
-            transition-property: transform;
-            transition-duration: 0.2s;
-            color: rgba(0, 0, 0, 0.3);
-            position: absolute;
-            right: 6px;
-            margin-top: -3px;
-        }
-        .mdl-accordion.mdl-accordion--opened .mdl-accordion__icon {
-            transform: rotate(-180deg);
-        }
-        .mdl-accordion.mdl-accordion--opened .mdl-accordion__button {
-            background-color:#e0e0e0;
-            color:#000;
-        }
-        .mdl-accordion.mdl-accordion--opened .mdl-accordion__content {
-            margin-top: 0 !important;
-        }
-
-        .discussion-header.mdl-card {
-            width: 100%;
-        }
-        .discussion-header > .mdl-card__title {
-            color: #fff;
-            height: 176px;
-            background: url('/images/messenger.png') center / cover;
-        }
-        .discussion-header > .mdl-card__menu {
-            color: #fff;
-        }
-
-        .bubble.right.mdl-card, .bubble.left.mdl-card {
-            width: 320px;
-            height: 320px;
-        }
-        .bubble.right > .mdl-card__title, .bubble.left > .mdl-card__title {
-            color: #000000;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: contain;
-        }
-    </style>
 </head>
 <body>
 

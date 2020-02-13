@@ -5,6 +5,7 @@ var adaro = require('adaro');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var sassMiddleware = require('node-sass-middleware');
+let cmd = require('node-cmd');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -54,5 +55,10 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+cmd.get(__dirname + '/node_modules/node-sass/bin/node-sass --output public/stylesheets --source-map true --source-map-contents public/stylesheets', (err, res) => {
+  console.log('Transpilation sass > css > css.map');
+});
+
 
 module.exports = app;
