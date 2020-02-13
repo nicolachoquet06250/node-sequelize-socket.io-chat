@@ -24,11 +24,14 @@ module.exports = class Websocket {
 
     set user(user) {
         for(let room_id in this.socket.sockets.rooms) {
-            console.log(this.socket.sockets.rooms[room_id].id, this.client.id);
             if(this.socket.sockets.rooms[room_id].id === this.client.id) {
                 this.socket.sockets.rooms[room_id].user = user;
             }
         }
+    }
+
+    get users() {
+        return this.socket.sockets.rooms.map(room => JSON.parse(room.user));
     }
 
     get sequelize() {
@@ -103,13 +106,20 @@ module.exports = class Websocket {
     on_user_stop_write(callback) {
         this.client.on('user_stop_write', callback)
     }
+    on_get_connected_users(callback) {
+        this.client.on('get_connected_users', callback);
+    }
 
     constructor(http_server) {
         this.socket = http_server;
 
         this.socket.on('connection', client => {
             this.client = client;
-            this.on_save_user(({user}) => this.user = user);
+            this.on_save_user(({user}) => {
+                this.user = user;
+                this.emit(this.client.id, 'get_connected_users', {users: this.users});
+                this.broadcast(this.client.id, 'get_connected_users', {users: this.users});
+            });
             this.on_new_message(({id, discussion, author, message}) => {
                 this.sequelize.authenticate().then(() => this.database.Message.create({text: message, author: author.id, discussion: discussion.id}))
                     .then(message => message.JSON)
@@ -169,6 +179,9 @@ module.exports = class Websocket {
                     .then(json => {
                         this.broadcast(response.id, 'disconnection_broadcast', {user: response.user, discussion: json});
                         this.emit(response.id, 'disconnection', {user: response.user, discussion: json});
+
+                        this.emit(this.client.id, 'get_connected_users', {users: this.users});
+                        this.broadcast(this.client.id, 'get_connected_users', {users: this.users});
                     });
             });
             this.on_user_write(({id, discussion, user}) => {
@@ -182,6 +195,7 @@ module.exports = class Websocket {
                     user: JSON.parse(this.get_client(client.id).user)
                 });
                 this.un_save_client(client.id);
+                this.broadcast(client.id, 'get_connected_users', {users: this.users});
             });
         });
     }

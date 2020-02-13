@@ -145,7 +145,7 @@
                     Connectés
                 </a>
                 <div class="mdl-accordion__content-wrapper">
-                    <div class="mdl-accordion__content mdl-animation--default">
+                    <div class="mdl-accordion__content mdl-animation--default connected-users">
                         <a class="mdl-navigation__link">Here</a>
                         <a class="mdl-navigation__link">There</a>
                     </div>

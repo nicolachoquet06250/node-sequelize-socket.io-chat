@@ -68,35 +68,6 @@ class Socket {
         this.emit('save_user', {user});
     }
 
-    on_catch_welcome(discussion, callback) {
-        this.socket.on(`${discussion}_welcome`, callback);
-        return this;
-    }
-    on_catch_message(discussion, callback) {
-        this.socket.on(`${discussion}_chatmsg`, callback);
-        return this;
-    }
-    on_catch_disconnection(discussion, callback) {
-        this.socket.on(`${discussion}_disconnection`, callback);
-        return this;
-    }
-    on_catch_name_response(discussion, callback) {
-        this.socket.on(`${discussion}_name_response`, callback);
-        return this;
-    }
-    on_catch_is_writing(discussion, callback) {
-        this.socket.on(`${discussion}_is_writing`, callback);
-        return this;
-    }
-    on_catch_is_not_writing(discussion, callback) {
-        this.socket.on(`${discussion}_is_not_writing`, callback);
-        return this;
-    }
-    on_catch_new_channel(callback) {
-        this.socket.on('new_channel', callback);
-        return this;
-    }
-
     on_welcome(callback) {
         this.socket.on('welcome', callback);
     }
@@ -129,5 +100,8 @@ class Socket {
     }
     on_user_stop_write(callback) {
         this.socket.on('user_stop_write', callback)
+    }
+    on_get_connected_users(callback) {
+        this.socket.on('get_connected_users', callback);
     }
 }
