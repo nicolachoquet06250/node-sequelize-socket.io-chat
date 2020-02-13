@@ -45,7 +45,7 @@ class Script {
             user = JSON.parse(user);
             const my_name = user.first_name;
             let protocol = 'ws';
-            if(window.location.protocol === 'https') {
+            if(window.location.protocol === 'https:') {
                 protocol += 's';
             }
             let server = new Socket(`${protocol}://${window.location.host}/`, my_name);
