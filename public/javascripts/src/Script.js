@@ -409,6 +409,7 @@ class Script {
             const connexion_form = document.querySelector('.connexion form');
             connexion_form.addEventListener('submit', e => {
                 e.preventDefault();
+                let message_connexion = document.querySelector('#message_connexion');
                 fetch(connexion_form.getAttribute('action'), {
                     method: connexion_form.getAttribute('method'),
                     headers: {
@@ -424,14 +425,18 @@ class Script {
                         new Promise((resolve, reject) =>
                             user.error === undefined ? resolve(user) : reject(user.error))
                     ).then(user => {
-                    localStorage.setItem('user', JSON.stringify(user));
-                    window.location.href = '/';
-                }).catch(err => document.querySelector('#message_connexion').innerHTML = err);
+                        localStorage.setItem('user', JSON.stringify(user));
+                        window.location.href = '/';
+                    }).catch(err => {
+                        message_connexion.style.color = 'red';
+                        message_connexion.innerHTML = err
+                    });
             });
 
             const inscription_form = document.querySelector('.inscription form');
             inscription_form.addEventListener('submit', e => {
                 e.preventDefault();
+                let message_inscription = document.querySelector('#message_inscription');
                 fetch(inscription_form.getAttribute('action'), {
                     method: inscription_form.getAttribute('method'),
                     headers: {
@@ -451,12 +456,18 @@ class Script {
                             user.error === undefined ? resolve(user) : reject(user.error)
                         )
                     ).then(() => {
-                        let message_inscription = document.querySelector('#message_inscription');
                         message_inscription.style.color = 'green';
                         message_inscription.innerHTML = 'Votre inscription à bien été prise en compte';
-                        setTimeout(() => document.querySelector('a[href="#connexion"]').click(), 2000);
+                        setTimeout(() => {
+                            document.querySelector('a[href="#connexion"]').click();
+                            message_inscription.style.color = 'inherit';
+                            message_inscription.innerHTML = '';
+                        }, 2000);
                     })
-                    .catch(err => document.querySelector('#message_inscription').innerHTML = err)
+                    .catch(err => {
+                        message_inscription.style.color = 'red';
+                        message_inscription.innerHTML = err;
+                    })
             });
         })();
 

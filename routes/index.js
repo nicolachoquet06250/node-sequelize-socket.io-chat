@@ -25,8 +25,14 @@ router.post('/api/login', (req, res) => {
 });
 
 router.post('/api/register', (req, res) => {
-  sequelize.authenticate().then(() => (async (first_name, last_name, email, password, avatar) =>
-      await db.User.create({first_name, last_name, email, password, avatar}))(
+  sequelize.authenticate().then(() => (async (email, password) => await db.User.findOne({where: {email, password}}))(req.body.email, req.body.password))
+      .then(user => (async (first_name, last_name, email, password, avatar) => {
+        if(user) {
+          throw {message: 'Un compte existe déjà avec ces identifiants.'}
+        } else {
+          return await db.User.create({first_name, last_name, email, password, avatar})
+        }
+      })(
           req.body.first_name,
           req.body.last_name,
           req.body.email,
