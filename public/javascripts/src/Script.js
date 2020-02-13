@@ -470,15 +470,14 @@ class Script {
                         new Promise((resolve, reject) =>
                             user.error === undefined ? resolve(user) : reject(user.error)
                         )
-                    )
-                    // .then(() => load_tab('connexion'))
+                    ).then(() => {
+                        let message_inscription = document.querySelector('#message_inscription');
+                        message_inscription.style.color = 'green';
+                        message_inscription.innerHTML = 'Votre inscription à bien été prise en compte';
+                        setTimeout(() => document.querySelector('a[href="#connexion"]').click(), 2000);
+                    })
                     .catch(err => document.querySelector('#message_inscription').innerHTML = err)
             });
-        })();
-
-        (function definitionDesClicksSurLesBoutons() {
-            // document.querySelector('.menu .connexion').addEventListener('click', () => load_tab('connexion'));
-            // document.querySelector('.menu .inscription').addEventListener('click', () => load_tab('inscription'));
         })();
 
         (function definitionDesActionsAuChargementDeLaPage() {
