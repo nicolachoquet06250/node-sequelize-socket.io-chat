@@ -12,8 +12,8 @@
     "migrate": "npx sequelize-cli db:migrate"
   },
   "dependencies": {
-    "@babel/cli": "^7.8.4",
-    "@babel/core": "^7.8.4",
+    "@babel/cli": "^7.0.0-beta.41",
+    "@babel/core": "^7.0.0-beta.41",
     "@babel/preset-env": "^7.8.4",
     "adaro": "~1.0.4",
     "babel-cli": "~7.0.0-beta.3",
