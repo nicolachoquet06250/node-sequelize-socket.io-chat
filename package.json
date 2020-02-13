@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "build": "babel public/javascripts/src/*.js --out-dir public/javascripts/dest",
+    "sass": "node_modules/node-sass/bin/node-sass --output public/stylesheets --source-map true --source-map-contents public/stylesheets",
     "fake-init": "node modules/sequelize/fake_datas/index.js",
     "prestart": "node bin/prestart.js",
     "start": "node ./bin/www",

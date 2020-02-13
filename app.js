@@ -56,7 +56,11 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-cmd.get(__dirname + '/node_modules/node-sass/bin/node-sass --output public/stylesheets --source-map true --source-map-contents public/stylesheets', (err, res) => {
+cmd.get('npm run build', () => {
+  console.log('Transpilation js es6 > js es5');
+});
+
+cmd.get('npm run sass', () => {
   console.log('Transpilation sass > css > css.map');
 });
 
