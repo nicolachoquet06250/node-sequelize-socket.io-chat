@@ -80,7 +80,7 @@
             <div class="page-content">
                 <div content="mdl-grid">
                     <div class="mdl-cell mdl-cell--12-cel-phone mdl-cell--6-cel-tablet mdl-cell--2-offset-tablet mdl-cell--4-cel-desktop mdl-cell--4-offset-desktop">
-                        <form method="post" action="/api/login" class="demo-card-wide mdl-card mdl-shadow--2dp">
+                        <form method="post" action="/api/register" class="demo-card-wide mdl-card mdl-shadow--2dp">
                             <div class="mdl-card__title">
                                 <h2 class="mdl-card__title-text" style="color: #000000;">Inscription</h2>
                             </div>
