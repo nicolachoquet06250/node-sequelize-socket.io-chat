@@ -44,7 +44,11 @@ class Script {
         if(user !== undefined && user !== null) {
             user = JSON.parse(user);
             const my_name = user.first_name;
-            var server = new Socket(`ws://${window.location.host}/`, my_name);
+            let protocol = 'ws';
+            if(window.location.protocol === 'https') {
+                protocol += 's';
+            }
+            let server = new Socket(`${protocol}://${window.location.host}/`, my_name);
             let script = this;
 
             let messages = document.querySelector('.messages');
