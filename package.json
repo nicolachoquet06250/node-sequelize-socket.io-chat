@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "babel public/javascripts/src -d public/javascripts/dest",
+    "build": "babel public/javascripts/src/*.js --out-file public/javascripts/dest/scripts.js",
     "fake-init": "node modules/sequelize/fake_datas/index.js",
     "prestart": "node bin/prestart.js",
     "start": "node ./bin/www",
