@@ -4,7 +4,7 @@
   "name" : "Messenger",
   "scope" : "/",
   "display" : "fullscreen",
-  "start_url" : "https://messenger.nicolaschoquet.fr/login",
+  "start_url" : "/login",
   "short_name" : "Messenger",
   "theme_color" : "transparent",
   "description" : "Application de messagerie en temps réel",
@@ -14,14 +14,14 @@
   "prefer_related_applications" : false,
   "icons" : [
     {
-      "src": "https://messenger.nicolaschoquet.fr/images/messenger.png",
+      "src": "/images/messenger.png",
       "sizes": "512x512"
     },
     {
-      "src": "https://messenger.nicolaschoquet.fr/images/messenger.png",
+      "src": "/images/messenger.png",
       "sizes": "512x512"
     }],
-  "url" : "https://messenger.nicolaschoquet.fr",
+  "url" : "/",
   "screenshots" : [],
   "generated" : "true"
 }

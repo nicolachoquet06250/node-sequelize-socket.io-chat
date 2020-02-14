@@ -41,32 +41,9 @@ class Script {
             .then(myBlob => myImage.src = URL.createObjectURL(myBlob));
     }
 
-    loadBackgroundImage(section) {
-        section.innerHTML += `<div class="mdl-progress mdl-js-progress mdl-progress__indeterminate js-dynamic-background-loader"></div>`;
-        fetch(section.getAttribute('data-background-image'))
-            .then(r => r.blob())
-            .then(myBlob => {
-                section.style.background = `url(${URL.createObjectURL(myBlob)}) center / cover`;
-                section.querySelector('.js-dynamic-background-loader').remove();
-            });
-    }
-
-    loadBubbleBackgroundImages() {
-        for(let section of document.querySelectorAll('.bubble .js-dynamic-background')) {
-            this.loadBackgroundImage(section)
-        }
-    }
-
-    loadDiscussionHeaderBackgroundImages() {
-        for(let section of document.querySelectorAll('.discussion-header .js-dynamic-background')) {
-            this.loadBackgroundImage(section)
-        }
-    }
-
-    loadConnexionPageBackgroundImages() {
-        for(let section of document.querySelectorAll('section .js-dynamic-background')) {
-            this.loadBackgroundImage(section)
-        }
+    static showImageAfterLoad(section) {
+        section.querySelector('img').style.display = 'block';
+        section.querySelector('.mdl-progress').setAttribute('hidden', 'hidden');
     }
 
     static initAccordionSizes() {
@@ -106,7 +83,7 @@ class Script {
                     }, user
                 });
             };
-            const add_message_to_list = (message, me) => {
+            const add_message_to_list = (message, me, index) => {
                 let date = new Date();
                 let isToday = true;
                 let isYesterday = false;
@@ -126,19 +103,22 @@ class Script {
 
                 let complete_name = message.author.first_name + (message.author.last_name ? ' ' + message.author.last_name : '');
                 let side = me ? 'right' : 'left';
-                let template = `<div class="mdl-grid" id="message-${message.discussion}-${date.toISOString().replace(/[:.]/g, '-')}">
+                messages.innerHTML += `<div class="mdl-grid" id="message-${message.discussion}-${date.toISOString().replace(/[:.]/g, '-')}${(index || '')}">
                 <div class="mdl-cell mdl-cell--12-col">
                     <div class="bubble ${side} mdl-card mdl-shadow--2dp" style="float: ${side}">
-                        <div class="mdl-card__title mdl-card--expand mdl-grid js-dynamic-background"
-                             data-background-image="${message.author.avatar ? message.author.avatar : '/images/messenger.png'}">
-                            <div class="mdl-cell mdl-cell--6-col mdl-cell--bottom">
-                                <h2 class="mdl-card__title-text">${complete_name}</h2>
-                            </div>
-                            <div class="mdl-cell mdl-cell--6-col mdl-cell--bottom">
+                        <div class="mdl-card__title mdl-card--expand js-dynamic-image" style="overflow: hidden;">
+                            <div class="mdl-grid" style="position: absolute; bottom: 100px; left: 0; right: 0;">
+                                <div class="mdl-cell mdl-cell--6-col mdl-cell--bottom">
+                                    <h2 class="mdl-card__title-text">${complete_name}</h2>
+                                </div>
+                                <div class="mdl-cell mdl-cell--6-col mdl-cell--bottom">
                                 <i class="mdl-card__description-text">
                                     ${dateToWrite}
                                 </i>
                             </div>
+                            </div>
+                            <img alt="logo" src="${message.author.avatar ? message.author.avatar : '/images/messenger.png'}" style="width: 100%; display: none;" onload="Script.showImageAfterLoad(this.parentElement)" />
+                            <div class="mdl-progress mdl-js-progress mdl-progress__indeterminate js-dynamic-background-loader loader-image-${message.discussion}-${date.toISOString().replace(/[:.]/g, '-')}${(index || '')}"></div>
                         </div>
                         <div class="mdl-card__supporting-text">
                             ${message.text.replace(/\n/g, '<br />')}
@@ -154,8 +134,7 @@ class Script {
                     </div>
                 </div>
             </div>`;
-                messages.innerHTML += template;
-                return document.querySelector(`#message-${message.discussion}-${date.toISOString().replace(/[:.]/g, '-')}`);
+                return  document.querySelector(`#message-${message.discussion}-${date.toISOString().replace(/[:.]/g, '-')}${(index || '')}`);
             };
             const select_discussion = id => {
                 for(let d of document.querySelectorAll(`.discussions .mdl-navigation__link`)) {
@@ -219,8 +198,11 @@ class Script {
                 Tous les inscrit peuvent participer à n'importe quelle conversation.`;
                 messages.innerHTML = '';
                 let last_message = null;
-                for(let message of discussion.messages)
-                    last_message = add_message_to_list(message, user.id === message.author.id);
+                let index = 0;
+                for(let message of discussion.messages) {
+                    last_message = add_message_to_list(message, user.id === message.author.id, index);
+                    index++;
+                }
 
                 if(last_message) {
                     window.location.hash = `#${last_message.getAttribute('id')}`;
@@ -270,9 +252,6 @@ class Script {
                     if(response.created)
                         add_discussion_to_list(response.discussion);
                     Script.initAccordionSizes();
-
-                    script.loadDiscussionHeaderBackgroundImages();
-                    script.loadBubbleBackgroundImages();
                 });
                 server.on_new_discussion_broadcast(response => {
                     for(let d of discussions) {
@@ -281,9 +260,6 @@ class Script {
                     for(let discussion of response.discussions)
                         add_discussion_to_list(discussion);
                     Script.initAccordionSizes();
-
-                    script.loadDiscussionHeaderBackgroundImages();
-                    script.loadBubbleBackgroundImages();
                 });
                 server.on_welcome(response => {
                     let message = add_message_to_list({
@@ -291,10 +267,6 @@ class Script {
                         discussion: parseInt(localStorage.getItem('current_discussion')),
                         author: {first_name: 'Serveur'}
                     }, false);
-
-                    script.loadDiscussionHeaderBackgroundImages();
-                    script.loadBubbleBackgroundImages();
-
                     window.location.hash = `#${message.getAttribute('id')}`;
                 });
                 server.on_welcome_broadcast(response => {
@@ -318,24 +290,14 @@ class Script {
                     if(!response.error)
                         load_discussion(response.discussion);
                     Script.initAccordionSizes();
-
-                    script.loadDiscussionHeaderBackgroundImages();
-                    script.loadBubbleBackgroundImages();
                 });
                 server.on_new_message(({message}) => {
                     let last_message = add_message_to_list(message, true);
-
-                    script.loadDiscussionHeaderBackgroundImages();
-                    script.loadBubbleBackgroundImages();
-
                     window.location.hash = `#${last_message.getAttribute('id')}`;
                 });
                 server.on_new_message_broadcast(({message, discussion}) => {
                     if(message.discussion === parseInt(localStorage.getItem('current_discussion'))) {
                         let last_message = add_message_to_list(message, false);
-
-                        script.loadDiscussionHeaderBackgroundImages();
-                        script.loadBubbleBackgroundImages();
 
                         window.location.hash = `#${last_message.getAttribute('id')}`;
                     }
@@ -356,9 +318,6 @@ class Script {
                                 discussion: parseInt(localStorage.getItem('current_discussion')),
                                 author: {first_name: 'Serveur'}
                             }, false);
-
-                            script.loadDiscussionHeaderBackgroundImages();
-                            script.loadBubbleBackgroundImages();
 
                             window.location.hash = `#${last_message.getAttribute('id')}`;
                         }
@@ -384,9 +343,6 @@ class Script {
                                 discussion: parseInt(localStorage.getItem('current_discussion')),
                                 author: {first_name: 'Serveur'}
                             }, false);
-
-                            script.loadDiscussionHeaderBackgroundImages();
-                            script.loadBubbleBackgroundImages();
 
                             window.location.hash = `#${last_message.getAttribute('id')}`;
                         }
@@ -462,11 +418,11 @@ class Script {
                         : server.emit('user_stop_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}}));
             })();
 
-            (function definitionDesActionsAuChargementDeLaPage(script) {
+            (function definitionDesActionsAuChargementDeLaPage() {
                 message_form.hide();
                 init_discussions();
                 Script.initAccordionSizes();
-            })(this);
+            })();
         } else window.location.href = '/login';
     }
 
@@ -539,7 +495,6 @@ class Script {
 
         (function definitionDesActionsAuChargementDeLaPage(script) {
             localStorage.removeItem('user');
-            script.loadConnexionPageBackgroundImages();
         })(this);
 
     }

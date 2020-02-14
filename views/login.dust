@@ -38,9 +38,11 @@
                     <div content="mdl-grid">
                         <div class="mdl-cell mdl-cell--12-cel-phone mdl-cell--6-cel-tablet mdl-cell--2-offset-tablet mdl-cell--4-cel-desktop mdl-cell--4-offset-desktop">
                             <form method="post" action="/api/login" class="form-card mdl-card mdl-shadow--2dp">
-                                <div class="mdl-card__title js-dynamic-background"
-                                     data-background-image="/images/messenger.png">
-                                    <h2 class="mdl-card__title-text" style="color: #000000;">Connexion</h2>
+                                <div class="mdl-card__title js-dynamic-image" style="overflow: hidden;">
+                                    <h2 class="mdl-card__title-text"
+                                        style="color: #000000; position: absolute;">Connexion</h2>
+                                    <img alt="logo" src="/images/messenger.png" style="width: 100%; display: none;" onload="Script.showImageAfterLoad(document.querySelector('#connexion'))" />
+                                    <div class="mdl-progress mdl-js-progress mdl-progress__indeterminate js-dynamic-background-loader loader-image-0"></div>
                                 </div>
 
                                 <div class="mdl-card__supporting-text">
@@ -80,9 +82,12 @@
                     <div content="mdl-grid">
                         <div class="mdl-cell mdl-cell--12-cel-phone mdl-cell--6-cel-tablet mdl-cell--2-offset-tablet mdl-cell--4-cel-desktop mdl-cell--4-offset-desktop">
                             <form method="post" action="/api/register" class="form-card mdl-card mdl-shadow--2dp">
-                                <div class="mdl-card__title js-dynamic-background"
-                                     data-background-image="/images/messenger.png">
-                                    <h2 class="mdl-card__title-text" style="color: #000000;">Inscription</h2>
+                                <div class="mdl-card__title js-dynamic-image"
+                                     style="overflow: hidden;">
+                                    <h2 class="mdl-card__title-text"
+                                        style="color: #000000; position: absolute;">Inscription</h2>
+                                    <img alt="logo" src="/images/messenger.png" style="width: 100%; display: none;" onload="Script.showImageAfterLoad(document.querySelector('#inscription'))" />
+                                    <div class="mdl-progress mdl-js-progress mdl-progress__indeterminate js-dynamic-background-loader loader-image-1"></div>
                                 </div>
 
                                 <div class="mdl-card__supporting-text">
@@ -131,7 +136,7 @@
         </main>
     </div>
 </body>
-<script src="/javascripts/dest/pwabuilder-sw-register.js"></script>
+<!--<script src="/javascripts/dest/pwabuilder-sw-register.js"></script>-->
 <script>var PAGE = 'login';</script>
 <script src="/javascripts/dest/load_page_script.js"></script>
 </html>
