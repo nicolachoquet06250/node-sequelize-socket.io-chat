@@ -33,7 +33,43 @@ class Script {
         return this._notification;
     }
 
-    initAccordionSizes() {
+    toto() {
+        let myImage = document.querySelector('.my-image');
+
+        fetch('flowers.jpg')
+            .then(r => r.blob())
+            .then(myBlob => myImage.src = URL.createObjectURL(myBlob));
+    }
+
+    loadBackgroundImage(section) {
+        section.innerHTML += `<div class="mdl-progress mdl-js-progress mdl-progress__indeterminate js-dynamic-background-loader"></div>`;
+        fetch(section.getAttribute('data-background-image'))
+            .then(r => r.blob())
+            .then(myBlob => {
+                section.style.background = `url(${URL.createObjectURL(myBlob)}) center / cover`;
+                section.querySelector('.js-dynamic-background-loader').remove();
+            });
+    }
+
+    loadBubbleBackgroundImages() {
+        for(let section of document.querySelectorAll('.bubble .js-dynamic-background')) {
+            this.loadBackgroundImage(section)
+        }
+    }
+
+    loadDiscussionHeaderBackgroundImages() {
+        for(let section of document.querySelectorAll('.discussion-header .js-dynamic-background')) {
+            this.loadBackgroundImage(section)
+        }
+    }
+
+    loadConnexionPageBackgroundImages() {
+        for(let section of document.querySelectorAll('section .js-dynamic-background')) {
+            this.loadBackgroundImage(section)
+        }
+    }
+
+    static initAccordionSizes() {
         document.querySelectorAll('.mdl-accordion__content').forEach(accordion => {
             accordion.style.marginTop = '-' + accordion.offsetHeight.toString() + 'px';
         });
@@ -49,7 +85,6 @@ class Script {
                 protocol += 's';
             }
             let server = new Socket(`${protocol}://${window.location.host}/`, my_name);
-            let script = this;
 
             let messages = document.querySelector('.messages');
             let discussions = document.querySelectorAll('.discussions');
@@ -94,8 +129,8 @@ class Script {
                 let template = `<div class="mdl-grid" id="message-${message.discussion}-${date.toISOString().replace(/[:.]/g, '-')}">
                 <div class="mdl-cell mdl-cell--12-col">
                     <div class="bubble ${side} mdl-card mdl-shadow--2dp" style="float: ${side}">
-                        <div class="mdl-card__title mdl-card--expand mdl-grid" 
-                             style="background-image: url('${message.author.avatar ? message.author.avatar : '/images/messenger.png'}');">
+                        <div class="mdl-card__title mdl-card--expand mdl-grid js-dynamic-background"
+                             data-background-image="${message.author.avatar ? message.author.avatar : '/images/messenger.png'}">
                             <div class="mdl-cell mdl-cell--6-col mdl-cell--bottom">
                                 <h2 class="mdl-card__title-text">${complete_name}</h2>
                             </div>
@@ -228,13 +263,16 @@ class Script {
                 }
             };
 
-            (function definitionDesEcouteursDEvenementsSockets() {
+            (function definitionDesEcouteursDEvenementsSockets(script) {
                 server.save_client();
                 server.save_user();
                 server.on_new_discussion(response => {
                     if(response.created)
                         add_discussion_to_list(response.discussion);
-                    script.initAccordionSizes();
+                    Script.initAccordionSizes();
+
+                    script.loadDiscussionHeaderBackgroundImages();
+                    script.loadBubbleBackgroundImages();
                 });
                 server.on_new_discussion_broadcast(response => {
                     for(let d of discussions) {
@@ -242,7 +280,10 @@ class Script {
                     }
                     for(let discussion of response.discussions)
                         add_discussion_to_list(discussion);
-                    script.initAccordionSizes();
+                    Script.initAccordionSizes();
+
+                    script.loadDiscussionHeaderBackgroundImages();
+                    script.loadBubbleBackgroundImages();
                 });
                 server.on_welcome(response => {
                     let message = add_message_to_list({
@@ -250,6 +291,10 @@ class Script {
                         discussion: parseInt(localStorage.getItem('current_discussion')),
                         author: {first_name: 'Serveur'}
                     }, false);
+
+                    script.loadDiscussionHeaderBackgroundImages();
+                    script.loadBubbleBackgroundImages();
+
                     window.location.hash = `#${message.getAttribute('id')}`;
                 });
                 server.on_welcome_broadcast(response => {
@@ -272,15 +317,26 @@ class Script {
                 server.on_get_discussion(response => {
                     if(!response.error)
                         load_discussion(response.discussion);
-                    script.initAccordionSizes();
+                    Script.initAccordionSizes();
+
+                    script.loadDiscussionHeaderBackgroundImages();
+                    script.loadBubbleBackgroundImages();
                 });
                 server.on_new_message(({message}) => {
                     let last_message = add_message_to_list(message, true);
+
+                    script.loadDiscussionHeaderBackgroundImages();
+                    script.loadBubbleBackgroundImages();
+
                     window.location.hash = `#${last_message.getAttribute('id')}`;
                 });
                 server.on_new_message_broadcast(({message, discussion}) => {
                     if(message.discussion === parseInt(localStorage.getItem('current_discussion'))) {
                         let last_message = add_message_to_list(message, false);
+
+                        script.loadDiscussionHeaderBackgroundImages();
+                        script.loadBubbleBackgroundImages();
+
                         window.location.hash = `#${last_message.getAttribute('id')}`;
                     }
                     else
@@ -300,6 +356,10 @@ class Script {
                                 discussion: parseInt(localStorage.getItem('current_discussion')),
                                 author: {first_name: 'Serveur'}
                             }, false);
+
+                            script.loadDiscussionHeaderBackgroundImages();
+                            script.loadBubbleBackgroundImages();
+
                             window.location.hash = `#${last_message.getAttribute('id')}`;
                         }
                         else {
@@ -318,12 +378,18 @@ class Script {
                                 body: `L'utilisateur ${first_name} s'est déconnecté !`,
                                 icon: '/images/messenger.png'
                             });
-                        else
-                            add_message_to_list({
+                        else {
+                            let last_message = add_message_to_list({
                                 text: `L'utilisateur ${first_name} s'est déconnecté !`,
                                 discussion: parseInt(localStorage.getItem('current_discussion')),
                                 author: {first_name: 'Serveur'}
                             }, false);
+
+                            script.loadDiscussionHeaderBackgroundImages();
+                            script.loadBubbleBackgroundImages();
+
+                            window.location.hash = `#${last_message.getAttribute('id')}`;
+                        }
                     }
                 });
                 server.on_user_write(response => {
@@ -345,10 +411,10 @@ class Script {
                     if(_connected_users.length === 0) {
                         add_user_to_list({message: 'Aucun utilisateur connecté'});
                     }
-                    script.initAccordionSizes();
+                    Script.initAccordionSizes();
                     console.log(_connected_users);
                 });
-            })();
+            })(this);
 
             (function definitionDesClicksSurLesBoutons() {
                 send_button.addEventListener('click', () => {
@@ -396,11 +462,11 @@ class Script {
                         : server.emit('user_stop_write', {id: server.id, user, discussion: {id: parseInt(localStorage.getItem('current_discussion'))}}));
             })();
 
-            (function definitionDesActionsAuChargementDeLaPage() {
+            (function definitionDesActionsAuChargementDeLaPage(script) {
                 message_form.hide();
                 init_discussions();
-                script.initAccordionSizes();
-            })();
+                Script.initAccordionSizes();
+            })(this);
         } else window.location.href = '/login';
     }
 
@@ -471,8 +537,9 @@ class Script {
             });
         })();
 
-        (function definitionDesActionsAuChargementDeLaPage() {
+        (function definitionDesActionsAuChargementDeLaPage(script) {
             localStorage.removeItem('user');
-        })();
+            script.loadConnexionPageBackgroundImages();
+        })(this);
     }
 }

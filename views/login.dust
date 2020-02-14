@@ -17,130 +17,118 @@
     <script src="/javascripts/dest/Script.js"></script>
 </head>
 <body>
-<!-- Simple header with fixed tabs. -->
-<div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout--fixed-tabs">
-    <header class="mdl-layout__header">
-        <div class="mdl-layout__header-row mdl-layout--large-screen">
-            <!-- Title -->
-            <span class="mdl-layout-title">{title}</span>
-        </div>
-        <!-- Tabs -->
-        <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
-            <a href="#connexion" class="mdl-layout__tab is-active">Connexion</a>
-            <a href="#inscription" class="mdl-layout__tab">Inscription</a>
-        </div>
-    </header>
-    <main class="mdl-layout__content">
-        <section class="mdl-layout__tab-panel is-active connexion" id="connexion">
-            <div class="page-content">
-                <div content="mdl-grid">
-                    <div class="mdl-cell mdl-cell--12-cel-phone mdl-cell--6-cel-tablet mdl-cell--2-offset-tablet mdl-cell--4-cel-desktop mdl-cell--4-offset-desktop">
-                        <form method="post" action="/api/login" class="form-card mdl-card mdl-shadow--2dp">
-                            <div class="mdl-card__title">
-                                <h2 class="mdl-card__title-text" style="color: #000000;">Connexion</h2>
-                            </div>
-                            <div class="mdl-card__supporting-text">
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                Mauris sagittis pellentesque lacus eleifend lacinia...
+    <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout--fixed-tabs">
+        <header class="mdl-layout__header">
+            <div class="mdl-layout__header-row mdl-layout--large-screen">
+                <!-- Title -->
+                <span class="mdl-layout-title">{title}</span>
+            </div>
 
-                                <div style="text-align: center;">
-                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                        <input class="mdl-textfield__input" type="email" id="email_connexion">
-                                        <label class="mdl-textfield__label" for="email_connexion">Email</label>
-                                    </div>
-                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                        <input class="mdl-textfield__input" type="password" id="password_connexion">
-                                        <label class="mdl-textfield__label" for="password_connexion">Mot de passe</label>
-                                    </div>
+            <!-- Tabs -->
+            <div class="mdl-layout__tab-bar mdl-js-ripple-effect">
+                <a href="#connexion" class="mdl-layout__tab is-active">Connexion</a>
+                <a href="#inscription" class="mdl-layout__tab">Inscription</a>
+            </div>
+        </header>
+
+        <main class="mdl-layout__content">
+            <section class="mdl-layout__tab-panel is-active connexion" id="connexion">
+                <div class="page-content">
+                    <div content="mdl-grid">
+                        <div class="mdl-cell mdl-cell--12-cel-phone mdl-cell--6-cel-tablet mdl-cell--2-offset-tablet mdl-cell--4-cel-desktop mdl-cell--4-offset-desktop">
+                            <form method="post" action="/api/login" class="form-card mdl-card mdl-shadow--2dp">
+                                <div class="mdl-card__title js-dynamic-background"
+                                     data-background-image="/images/messenger.png">
+                                    <h2 class="mdl-card__title-text" style="color: #000000;">Connexion</h2>
                                 </div>
-                                <p id="message_connexion"></p>
-                            </div>
-                            <div class="mdl-card__actions mdl-card--border">
-                                <button type="submit" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-                                    Se connecter
-                                </button>
-                            </div>
-                        </form>
+
+                                <div class="mdl-card__supporting-text">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                    Mauris sagittis pellentesque lacus eleifend lacinia...
+
+                                    <div style="text-align: center;">
+                                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                            <input class="mdl-textfield__input" type="email" id="email_connexion">
+
+                                            <label class="mdl-textfield__label" for="email_connexion">Email</label>
+                                        </div>
+
+                                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                            <input class="mdl-textfield__input" type="password" id="password_connexion">
+
+                                            <label class="mdl-textfield__label" for="password_connexion">Mot de passe</label>
+                                        </div>
+                                    </div>
+
+                                    <p id="message_connexion"></p>
+                                </div>
+
+                                <div class="mdl-card__actions mdl-card--border">
+                                    <button type="submit" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                                        Se connecter
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
-        <section class="mdl-layout__tab-panel inscription" id="inscription">
-            <div class="page-content">
-                <div content="mdl-grid">
-                    <div class="mdl-cell mdl-cell--12-cel-phone mdl-cell--6-cel-tablet mdl-cell--2-offset-tablet mdl-cell--4-cel-desktop mdl-cell--4-offset-desktop">
-                        <form method="post" action="/api/register" class="form-card mdl-card mdl-shadow--2dp">
-                            <div class="mdl-card__title">
-                                <h2 class="mdl-card__title-text" style="color: #000000;">Inscription</h2>
-                            </div>
-                            <div class="mdl-card__supporting-text">
-                                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                                Mauris sagittis pellentesque lacus eleifend lacinia...
+            </section>
 
-                                <div style="text-align: center;">
-                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                        <input class="mdl-textfield__input" type="text" id="firstname_inscription">
-                                        <label class="mdl-textfield__label" for="firstname_inscription">Prénom</label>
-                                    </div>
-                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                        <input class="mdl-textfield__input" type="text" id="lastname_inscription">
-                                        <label class="mdl-textfield__label" for="lastname_inscription">Nom de famille</label>
-                                    </div>
-                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                        <input class="mdl-textfield__input" type="email" id="email_inscription">
-                                        <label class="mdl-textfield__label" for="email_inscription">Email</label>
-                                    </div>
-                                    <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-                                        <input class="mdl-textfield__input" type="password" id="password_inscription">
-                                        <label class="mdl-textfield__label" for="password_inscription">Mot de passe</label>
-                                    </div>
-                                    <p id="message_inscription"></p>
+            <section class="mdl-layout__tab-panel inscription" id="inscription">
+                <div class="page-content">
+                    <div content="mdl-grid">
+                        <div class="mdl-cell mdl-cell--12-cel-phone mdl-cell--6-cel-tablet mdl-cell--2-offset-tablet mdl-cell--4-cel-desktop mdl-cell--4-offset-desktop">
+                            <form method="post" action="/api/register" class="form-card mdl-card mdl-shadow--2dp">
+                                <div class="mdl-card__title js-dynamic-background"
+                                     data-background-image="/images/messenger.png">
+                                    <h2 class="mdl-card__title-text" style="color: #000000;">Inscription</h2>
                                 </div>
-                            </div>
-                            <div class="mdl-card__actions mdl-card--border">
-                                <button type="submit" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
-                                    S'inscrire
-                                </button>
-                            </div>
-                        </form>
+
+                                <div class="mdl-card__supporting-text">
+                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                                    Mauris sagittis pellentesque lacus eleifend lacinia...
+
+                                    <div style="text-align: center;">
+                                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                            <input class="mdl-textfield__input" type="text" id="firstname_inscription">
+
+                                            <label class="mdl-textfield__label" for="firstname_inscription">Prénom</label>
+                                        </div>
+
+                                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                            <input class="mdl-textfield__input" type="text" id="lastname_inscription">
+
+                                            <label class="mdl-textfield__label" for="lastname_inscription">Nom de famille</label>
+                                        </div>
+
+                                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                            <input class="mdl-textfield__input" type="email" id="email_inscription">
+
+                                            <label class="mdl-textfield__label" for="email_inscription">Email</label>
+                                        </div>
+
+                                        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+                                            <input class="mdl-textfield__input" type="password" id="password_inscription">
+
+                                            <label class="mdl-textfield__label" for="password_inscription">Mot de passe</label>
+                                        </div>
+
+                                        <p id="message_inscription"></p>
+                                    </div>
+                                </div>
+
+                                <div class="mdl-card__actions mdl-card--border">
+                                    <button type="submit" class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect">
+                                        S'inscrire
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
-    </main>
-</div>
-
-    <!--<nav class="menu">
-        <button class="connexion">Connexion</button>
-        <button class="inscription">Inscription</button>
-    </nav>
-    <div class="tabs">
-        <div class="connexion">
-            <form method="post" action="/api/login">
-                <input type="email" placeholder="email" id="email_connexion" />
-                <br />
-                <input type="password" placeholder="mot de passe" id="password_connexion" />
-                <br />
-                <p id="message_connexion"></p>
-                <input type="submit" value="Valider" />
-            </form>
-        </div>
-        <div class="inscription">
-            <form method="post" action="/api/register">
-                <input type="text" placeholder="prénom" id="firstname_connexion" />
-                <br />
-                <input type="text" placeholder="nom" id="lastname_connexion" />
-                <br />
-                <input type="email" placeholder="email" id="email_inscription" />
-                <input type="hidden" id="avatar" value="" />
-                <br />
-                <input type="password" placeholder="mot de passe" id="password_inscription" />
-                <br />
-                <p id="message_inscription"></p>
-                <input type="submit" value="Valider" />
-            </form>
-        </div>
-    </div>-->
+            </section>
+        </main>
+    </div>
 </body>
 <script>var PAGE = 'login';</script>
 <script src="/javascripts/dest/load_page_script.js"></script>

@@ -77,7 +77,8 @@
 
     <main class="mdl-layout__content">
         <div class="discussion-header mdl-card mdl-shadow--2dp">
-            <div class="mdl-card__title">
+            <div class="mdl-card__title js-dynamic-background"
+                 data-background-image="/images/messenger.png">
                 <h2 class="mdl-card__title-text discussion-title"></h2>
             </div>
             <div class="mdl-card__supporting-text discussion-description"></div>
