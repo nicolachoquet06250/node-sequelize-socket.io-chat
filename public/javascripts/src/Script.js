@@ -541,5 +541,6 @@ class Script {
             localStorage.removeItem('user');
             script.loadConnexionPageBackgroundImages();
         })(this);
+
     }
 }

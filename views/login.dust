@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <link rel='manifest' href='/manifest.json'>
     <link rel="icon" type="image/x-icon" href="/images/messenger.png" />
     <link rel="shortcut icon" type="image/x-icon" href="/images/messenger.png" />
     <title>{title} - Connection</title>
@@ -130,6 +131,7 @@
         </main>
     </div>
 </body>
+<script src="/javascripts/dest/pwabuilder-sw-register.js"></script>
 <script>var PAGE = 'login';</script>
 <script src="/javascripts/dest/load_page_script.js"></script>
 </html>
