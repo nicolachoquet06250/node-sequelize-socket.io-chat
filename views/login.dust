@@ -136,7 +136,7 @@
         </main>
     </div>
 </body>
-<!--<script src="/javascripts/dest/pwabuilder-sw-register.js"></script>-->
+<script src="/javascripts/dest/pwabuilder-sw-register.js"></script>
 <script>var PAGE = 'login';</script>
 <script src="/javascripts/dest/load_page_script.js"></script>
 </html>
