@@ -10,7 +10,8 @@
     <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-indigo.min.css" />
     <link rel='stylesheet' href='/stylesheets/style.css'/>
     <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
-<!--    <script src="/javascripts/socket.io-client/dist/socket.io.js"></script>-->
+    <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="/javascripts/socket.io-client/dist/socket.io.js"></script>
 <!--    <script src="/javascripts/dest/Observable.js"></script>-->
 <!--    <script src="/javascripts/dest/Authors.js"></script>-->
 <!--    <script src="/javascripts/dest/Socket.js"></script>-->
@@ -95,7 +96,7 @@
     </div>
 
     <main class="mdl-layout__content">
-        <div class="discussion-header mdl-card mdl-shadow--2dp">
+        <!--<div class="discussion-header mdl-card mdl-shadow&#45;&#45;2dp">
             <div class="mdl-card__title js-dynamic-image" style="overflow: hidden;">
                 <h2 class="mdl-card__title-text discussion-title" style="position: absolute;"></h2>
 
@@ -106,10 +107,15 @@
             </div>
 
             <div class="mdl-card__supporting-text discussion-description"></div>
-        </div>
+        </div>-->
 
         <div class="page-content">
-            <video></video>
+            <video id="local"></video>
+            <br />
+            <video id="remote"></video>
+            <br />
+            <button id="callButton" disabled>call</button>
+            <button id="stopCallButton" disabled>stop</button>
         </div>
     </main>
 

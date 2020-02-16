@@ -197,6 +197,33 @@ module.exports = class Websocket {
                 this.un_save_client(client.id);
                 this.broadcast(client.id, 'get_connected_users', {users: this.users});
             });
+            
+            this.client.on('register_stream_video', ({id, called}) => {
+                let client_called = null;
+                for(let client of this.socket.sockets.rooms) {
+                    if(JSON.parse(client.user).id === called.id) {
+                        client_called = client;
+                        break;
+                    }
+                }
+
+                if(client_called) {
+                    client_called.emit('register_stream_video', {
+                        caller: JSON.parse(this.get_client(id).user)
+                    });
+
+                    this.emit(id, 'register_stream_video', {
+                        called: JSON.parse(client_called.user)
+                    });
+                } else {
+                    this.emit(id, 'register_stream_video', {
+                        error: `L'utilisateur que vous essayez de joindre n'est pas disponible`
+                    });
+                }
+            });
+            this.client.on('caller_response', ({id, caller_id, message}) => {});
+            this.client.on('caller_response_error', ({id, caller_id, message}) => {});
+            this.client.on('called_response', ({id, caller_id, message}) => {});
         });
     }
 };

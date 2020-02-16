@@ -182,7 +182,13 @@ class Script {
                     if(_user.message) {
                         user_a.innerHTML = _user.message;
                     } else {
-                        user_a.innerHTML = `${_user.first_name} ${_user.last_name}`;
+                        user_a.innerHTML = `<i class="material-icons">videocam</i> ${_user.first_name} ${_user.last_name}`;
+
+                        // user_a.addEventListener('click', e => {
+                        //     e.preventDefault();
+                        //     localStorage.setItem('userToCall', JSON.stringify(_user));
+                        //     window.location.href = '/video';
+                        // });
                     }
                     user_a.style.cursor = 'pointer';
                     user_a.setAttribute('data-id', _user.id);
@@ -504,35 +510,71 @@ class Script {
     }
 
     video() {
-        const constraints = {
-            audio: false,
+        const streamConstraints = {
+            audio: true,
             video: true
         };
 
-        navigator.mediaDevices = navigator.mediaDevices || {};
+        const localVideo = document.querySelector('#local');
+        window.socket = io(`ws${window.location.protocol === 'https:' ? 's' : ''}://${window.location.host}`);
+        window.socket.on('save_client', ({id}) => {
+            window.socket_id = id;
+            window.socket.emit('save_user', {user: localStorage.getItem('user')});
 
-        if (!navigator.mediaDevices.getUserMedia)
-            navigator.mediaDevices.getUserMedia = (constraints) => {
-                // First get ahold of the legacy getUserMedia, if present
-                let getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
-                // Some browsers just don't implement it - return a rejected promise with an error
-                // to keep a consistent interface
-                if (!getUserMedia) return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
-                // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
-                return new Promise((resolve, reject) => getUserMedia.call(navigator, constraints, resolve, reject));
-            };
+            if(localStorage.getItem('userToCall')) {
+                window.socket.emit('register_stream_video', {
+                    id: window.socket_id,
+                    called: JSON.parse(localStorage.getItem('userToCall'))
+                });
+            }
+        });
+        window.socket.on('register_stream_video', response => {
+            if(response.error) {
+                alert(response.error);
+            } else {
+                if(response.caller) {
+                    // I am called
+                    if(window.localStream) {
+                        // stream is registered
+                        window.socket.emit('caller_response', {
+                            id: window.socket_id,
+                            caller_id: response.id,
+                            stream_url: URL.createObjectURL(window.localStream)
+                        })
+                    } else {
+                        // send an error
+                        window.socket.emit('caller_response_error', {
+                            id: window.socket_id,
+                            caller_id: response.id,
+                            message: `L'utilisateur n'a pas de caméra disponible`
+                        })
+                    }
+                    console.log('caller', response.caller);
+                } else {
+                    // I am the caller
+                    console.log('called', response.called);
+                }
+            }
+        });
 
-        navigator.mediaDevices
-            .getUserMedia(constraints)
-            .then(stream => {
-                window.stream = stream;
-                let video = document.querySelector('video');
-                console.log(stream.getVideoTracks()[0]);
-                // Older browsers may not have srcObject
-                video.srcObject = stream;
-                video.onloadedmetadata = e => video.play();
-            })
-            .catch(err => console.error(err));
+        function goLocalMediaStream(mediaStream) {
+            window.localStream = mediaStream;
+            localVideo.srcObject = mediaStream;
+            localVideo.onloadedmetadata = e => localVideo.play();
 
+            if(localStorage.getItem('userToCall')) {
+                window.socket.emit('register_stream_video', {
+                    id: window.socket_id,
+                    called: JSON.parse(localStorage.getItem('userToCall'))
+                })
+            }
+        }
+
+        function handleLocalMediaStreamError(error) {
+            console.log('navigator.getUserMedia error: ', error);
+        }
+
+        navigator.getUserMedia(streamConstraints, goLocalMediaStream, handleLocalMediaStreamError);
+            // .then(goLocalMediaStream).catch(handleLocalMediaStreamError);
     }
 }
