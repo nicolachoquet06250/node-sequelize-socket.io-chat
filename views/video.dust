@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <title>{title} - Vidéo</title>
+    <link rel="icon" type="image/x-icon" href="/images/messenger.png" />
+    <link rel="shortcut icon" type="image/x-icon" href="/images/messenger.png" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="https://code.getmdl.io/1.3.0/material.blue-indigo.min.css" />
+    <link rel='stylesheet' href='/stylesheets/style.css'/>
+    <script defer src="https://code.getmdl.io/1.3.0/material.min.js"></script>
+<!--    <script src="/javascripts/socket.io-client/dist/socket.io.js"></script>-->
+<!--    <script src="/javascripts/dest/Observable.js"></script>-->
+<!--    <script src="/javascripts/dest/Authors.js"></script>-->
+<!--    <script src="/javascripts/dest/Socket.js"></script>-->
+    <script src="/javascripts/dest/Script.js"></script>
+</head>
+
+<body>
+<div class="messenger-layout mdl-layout mdl-js-layout">
+    <header class="mdl-layout__header mdl-layout__header--waterfall">
+        <div class="mdl-layout__header-row">
+            <span class="mdl-layout-title">{title}</span>
+
+            <div class="mdl-layout-spacer"></div>
+
+            <div class="mdl-textfield mdl-js-textfield mdl-textfield--expandable
+                      mdl-textfield--floating-label mdl-textfield--align-right">
+                <label class="mdl-button mdl-js-button mdl-button--icon"
+                       for="waterfall-exp">
+                    <i class="material-icons">search</i>
+                </label>
+
+                <div class="mdl-textfield__expandable-holder">
+                    <input class="mdl-textfield__input"
+                           type="text" name="sample"
+                           id="waterfall-exp" placeholder="Recherche">
+                </div>
+            </div>
+        </div>
+
+        <div class="mdl-layout__header-row">
+            <div class="mdl-layout-spacer"></div>
+
+            <nav class="mdl-navigation discussions">
+                <div class="mdl-navigation__link" style="text-align: center;">
+                    <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <div class="mdl-layout__drawer">
+        <span class="mdl-layout-title">{title}</span>
+
+        <nav class="mdl-navigation">
+            <div class="mdl-accordion mdl-accordion--opened">
+                <a class="mdl-navigation__link mdl-accordion__button">
+                    <i class="material-icons mdl-accordion__icon mdl-animation--default">expand_more</i>
+
+                    Discussions
+
+                    <button class="mdl-button mdl-js-button mdl-button--fab mdl-button--mini-fab mdl-accordion__icon-add add-new-discussion">
+                        <i class="material-icons">add</i>
+                    </button>
+                </a>
+
+                <div class="mdl-accordion__content-wrapper">
+                    <div class="mdl-accordion__content mdl-animation--default discussions">
+                        <div class="mdl-navigation__link" style="text-align: center;">
+                            <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="mdl-accordion">
+                <a class="mdl-navigation__link mdl-accordion__button">
+                    <i class="material-icons mdl-accordion__icon mdl-animation--default">expand_more</i>
+
+                    Connectés
+                </a>
+
+                <div class="mdl-accordion__content-wrapper">
+                    <div class="mdl-accordion__content mdl-animation--default connected-users">
+                        <div class="mdl-navigation__link" style="text-align: center;">
+                            <div class="mdl-spinner mdl-spinner--single-color mdl-js-spinner is-active"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <a href="/login" class="mdl-navigation__link">Se déconnecter</a>
+        </nav>
+    </div>
+
+    <main class="mdl-layout__content">
+        <div class="discussion-header mdl-card mdl-shadow--2dp">
+            <div class="mdl-card__title js-dynamic-image" style="overflow: hidden;">
+                <h2 class="mdl-card__title-text discussion-title" style="position: absolute;"></h2>
+
+                <img src="/images/messenger.png" alt="logo" style="width: 100%; display: none;"
+                     onload="Script.showImageAfterLoad(document.querySelector('.discussion-header'))" />
+
+                <div class="mdl-progress mdl-js-progress mdl-progress__indeterminate js-dynamic-background-loader loader-image-1"></div>
+            </div>
+
+            <div class="mdl-card__supporting-text discussion-description"></div>
+        </div>
+
+        <div class="page-content">
+            <video></video>
+        </div>
+    </main>
+
+    <footer class="mdl-mega-footer">
+        <div class="mdl-mega-footer__bottom-section">
+            <div class="mdl-logo">Messenger</div>
+
+            <ul class="mdl-mega-footer__link-list">
+                <li>
+                    <a href="#">Help</a>
+                </li>
+
+                <li>
+                    <a href="#">Privacy & Terms</a>
+                </li>
+            </ul>
+        </div>
+    </footer>
+
+    <div class="mdl-js-snackbar mdl-snackbar notification-toast">
+        <div class="mdl-snackbar__text"></div>
+
+        <button class="mdl-snackbar__action" type="button"></button>
+    </div>
+</div>
+</body>
+
+<script>var PAGE = 'video';</script>
+<script src="/javascripts/dest/load_page_script.js"></script>
+</html>

@@ -17,6 +17,10 @@ router.get('/login', (req, res) => {
   res.render('login', {title: 'Messenger'});
 });
 
+router.get('/video', (req, res) => {
+    res.render('video', {title: 'Messenger'});
+});
+
 // API
 router.post('/api/login', (req, res) => {
   sequelize.authenticate().then(() => (async (email, password) => await db.User.findOne({where: {email, password}}))(req.body.email, req.body.password))

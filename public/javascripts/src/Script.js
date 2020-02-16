@@ -502,4 +502,37 @@ class Script {
         })(this);
 
     }
+
+    video() {
+        const constraints = {
+            audio: false,
+            video: true
+        };
+
+        navigator.mediaDevices = navigator.mediaDevices || {};
+
+        if (!navigator.mediaDevices.getUserMedia)
+            navigator.mediaDevices.getUserMedia = (constraints) => {
+                // First get ahold of the legacy getUserMedia, if present
+                let getUserMedia = navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+                // Some browsers just don't implement it - return a rejected promise with an error
+                // to keep a consistent interface
+                if (!getUserMedia) return Promise.reject(new Error('getUserMedia is not implemented in this browser'));
+                // Otherwise, wrap the call to the old navigator.getUserMedia with a Promise
+                return new Promise((resolve, reject) => getUserMedia.call(navigator, constraints, resolve, reject));
+            };
+
+        navigator.mediaDevices
+            .getUserMedia(constraints)
+            .then(stream => {
+                window.stream = stream;
+                let video = document.querySelector('video');
+                console.log(stream.getVideoTracks()[0]);
+                // Older browsers may not have srcObject
+                video.srcObject = stream;
+                video.onloadedmetadata = e => video.play();
+            })
+            .catch(err => console.error(err));
+
+    }
 }
