@@ -56,12 +56,18 @@ app.use(function(err, req, res, next) {
   res.render('error');
 });
 
-cmd.get('npm run build', () => {
-  console.log('Transpilation js es6 > js es5');
+cmd.get('npm run build', (err) => {
+  if(err)
+    console.log(err);
+  else
+    console.log('Transpilation js es6 > js es5');
 });
 
-cmd.get('npm run sass', () => {
-  console.log('Transpilation sass > css > css.map');
+cmd.get('npm run sass', (err) => {
+  if(err)
+    console.log(err);
+  else
+    console.log('Transpilation sass > css > css.map');
 });
 
 

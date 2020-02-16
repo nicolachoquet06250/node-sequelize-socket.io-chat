@@ -227,9 +227,13 @@ class Script {
                     }
                 }).then(r => r.json())
                     .then(json => {
-                        if(json.success)
-                            for(let discussion of json.discussions)
-                                add_discussion_to_list(discussion);
+                        if(json.success) {
+                            for(let d of discussions) {
+                                d.innerHTML ='';
+                            }
+                            for (let d of json.discussions)
+                                add_discussion_to_list(d);
+                        }
 
                         get_current_discussion();
                     })
