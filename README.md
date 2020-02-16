@@ -5,3 +5,4 @@
     - https://socket.io/docs/
     - https://github.com/socketio/socket.io
     - https://getmdl.io
+    - https://www.materialpalette.com/icons
