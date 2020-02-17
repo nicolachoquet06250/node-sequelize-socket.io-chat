@@ -503,78 +503,108 @@ class Script {
             });
         })();
 
-        (function definitionDesActionsAuChargementDeLaPage(script) {
+        (function definitionDesActionsAuChargementDeLaPage() {
             localStorage.removeItem('user');
-        })(this);
-
+        })();
     }
 
     video() {
-        const streamConstraints = {
-            audio: true,
-            video: true
+        // Generate random room name if needed
+        if (!location.hash) {
+            location.hash = Math.floor(Math.random() * 0xFFFFFF).toString(16);
+        }
+        const roomHash = location.hash.substring(1);
+
+        // TODO: Replace with your own channel ID
+        const drone = new ScaleDrone('2xmbUiTsqTzukyf7');
+        // Room name needs to be prefixed with 'observable-'
+        const roomName = 'observable-' + roomHash;
+        const configuration = {
+            iceServers: [{
+                urls: 'stun:stun.l.google.com:19302'
+            }]
         };
+        let room;
+        let pc;
 
-        const localVideo = document.querySelector('#local');
-        window.socket = io(`ws${window.location.protocol === 'https:' ? 's' : ''}://${window.location.host}`);
-        window.socket.on('save_client', ({id}) => {
-            window.socket_id = id;
-            window.socket.emit('save_user', {user: localStorage.getItem('user')});
 
-            if(localStorage.getItem('userToCall')) {
-                window.socket.emit('register_stream_video', {
-                    id: window.socket_id,
-                    called: JSON.parse(localStorage.getItem('userToCall'))
-                });
+        let onSuccess = () => {};
+        let onError = error => console.error(error);
+
+        drone.on('open', error => {
+            if (error) {
+                return console.error(error);
             }
+            room = drone.subscribe(roomName);
+            room.on('open', error => {
+                if (error) {
+                    onError(error);
+                }
+            });
+            // We're connected to the room and received an array of 'members'
+            // connected to the room (including us). Signaling server is ready.
+            room.on('members', members => {
+                console.log('MEMBERS', members);
+                // If we are the second user to connect to the room we will be creating the offer
+                const isOfferer = members.length === 2;
+                startWebRTC(isOfferer);
+            });
         });
-        window.socket.on('register_stream_video', response => {
-            if(response.error) {
-                alert(response.error);
-            } else {
-                if(response.caller) {
-                    // I am called
-                    if(window.localStream) {
-                        // stream is registered
-                        window.socket.emit('caller_response', {
-                            id: window.socket_id,
-                            caller_id: response.id,
-                            stream_url: URL.createObjectURL(window.localStream)
-                        })
-                    } else {
-                        // send an error
-                        window.socket.emit('caller_response_error', {
-                            id: window.socket_id,
-                            caller_id: response.id,
-                            message: `L'utilisateur n'a pas de caméra disponible`
-                        })
-                    }
-                    console.log('caller', response.caller);
-                } else {
-                    // I am the caller
-                    console.log('called', response.called);
+
+        let localDescCreated = desc => pc.setLocalDescription(desc)
+            .then(() => sendMessage({'sdp': pc.localDescription}))
+            .catch(onError);
+
+        // Send signaling data via Scaledrone
+        let sendMessage = message => drone.publish({room: roomName, message});
+
+        let startWebRTC = isOfferer => {
+            pc = new RTCPeerConnection(configuration);
+
+            // 'onicecandidate' notifies us whenever an ICE agent needs to deliver a
+            // message to the other peer through the signaling server
+            pc.onicecandidate = event => {
+                if (event.candidate) {
+                    sendMessage({'candidate': event.candidate});
+                }
+            };
+
+            // If user is offerer let the 'negotiationneeded' event create the offer
+            if (isOfferer) {
+                pc.onnegotiationneeded = () => {
+                    pc.createOffer().then(localDescCreated).catch(onError);
                 }
             }
-        });
 
-        function goLocalMediaStream(mediaStream) {
-            window.localStream = mediaStream;
-            localVideo.srcObject = mediaStream;
-            localVideo.onloadedmetadata = e => localVideo.play();
+            // When a remote stream arrives display it in the video#remote element
+            pc.onaddstream = event => document.querySelector('video#remote').srcObject = event.stream;
 
-            if(localStorage.getItem('userToCall')) {
-                window.socket.emit('register_stream_video', {
-                    id: window.socket_id,
-                    called: JSON.parse(localStorage.getItem('userToCall'))
-                })
-            }
-        }
+            navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: true,
+            }).then(stream => {
+                // Display your local video in video#local element
+                document.querySelector('video#local').srcObject = stream;
+                // Add your stream to be sent to the conneting peer
+                pc.addStream(stream);
+            }, onError);
 
-        function handleLocalMediaStreamError(error) {
-            console.log('navigator.getUserMedia error: ', error);
-        }
+            // Listen to signaling data from Scaledrone
+            room.on('data', (message, client) => {
+                // Message was sent by us
+                if (!client || client.id === drone.clientId) return;
 
-        navigator.getUserMedia(streamConstraints, goLocalMediaStream, handleLocalMediaStreamError);
-            // .then(goLocalMediaStream).catch(handleLocalMediaStreamError);
+                if (message.sdp)
+                    // This is called after receiving an offer or answer from another peer
+                    pc.setRemoteDescription(new RTCSessionDescription(message.sdp)).then(() => {
+                        // When receiving an offer lets answer it
+                        if (pc.remoteDescription.type === 'offer')
+                            pc.createAnswer().then(localDescCreated).catch(onError);
+                    }).catch(onError);
+                else if (message.candidate)
+                    // Add the new ICE candidate to our connections remote description
+                    pc.addIceCandidate(new RTCIceCandidate(message.candidate)).then(onSuccess).catch(onError);
+            });
+        };
     }
 }
