@@ -127,12 +127,20 @@ class Script {
     set show_video_call_container(show) {
         switch (show) {
             case true:
-                document.querySelector('.hide-on-video-call').hidden = true;
-                document.querySelector('.show-on-video-call').hidden = false;
+                for(let hideInVideoCall of document.querySelectorAll('.hide-on-video-call')) {
+                    hideInVideoCall.hidden = true;
+                }
+                for(let showInVideoCall of document.querySelectorAll('.show-on-video-call')) {
+                   showInVideoCall.hidden = false;
+                }
                 break;
             case false:
-                document.querySelector('.hide-on-video-call').hidden = false;
-                document.querySelector('.show-on-video-call').hidden = true;
+                for(let hideInVideoCall of document.querySelectorAll('.hide-on-video-call')) {
+                    hideInVideoCall.hidden = false;
+                }
+                for(let showInVideoCall of document.querySelectorAll('.show-on-video-call')) {
+                    showInVideoCall.hidden = true;
+                }
                 break;
         }
     }
