@@ -525,6 +525,8 @@ class Script {
                         console.log(status);
                     }
                 });
+
+                server.socket.on('server_log', console.log);
             })(this);
 
             (function definitionDesClicksSurLesBoutons() {
