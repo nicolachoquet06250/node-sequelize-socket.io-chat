@@ -178,14 +178,12 @@ class Script {
             console.log('local', stream);
             let lastRemoteStream;
             call.on('stream', remoteStream => {
-                remoteStream.addEventListener('active', () => {
-                    if(!lastRemoteStream) {
-                        let video = this.createRemoteVideo();
-                        video.srcObject = remoteStream;
-                        console.log('remote', remoteStream);
-                        lastRemoteStream = remoteStream;
-                    }
-                });
+                if(!lastRemoteStream) {
+                    let video = this.createRemoteVideo();
+                    video.srcObject = remoteStream;
+                    console.log('remote', remoteStream);
+                    lastRemoteStream = remoteStream;
+                }
             });
 
             this.show_video_call_container = true;
@@ -607,14 +605,12 @@ class Script {
                     console.log('local', script.stream);
                     let lastRemoteStream;
                     call.on('stream', stream => {
-                        stream.addEventListener('active', () => {
-                            if(!lastRemoteStream) {
-                                let video = script.createRemoteVideo();
-                                video.srcObject = stream;
-                                console.log('remote', stream);
-                                lastRemoteStream = stream;
-                            }
-                        })
+                        if(!lastRemoteStream) {
+                            let video = script.createRemoteVideo();
+                            video.srcObject = stream;
+                            console.log('remote', stream);
+                            lastRemoteStream = stream;
+                        }
                     })
                 });
                 script.peer.on('disconnected', () => {
