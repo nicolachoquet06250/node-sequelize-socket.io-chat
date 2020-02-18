@@ -152,7 +152,7 @@ class Script {
     createRemoteVideo(remoteStream) {
         let video = document.createElement('video');
         video.autoplay = true;
-        video.srcObject = remoteStream;
+        video.src = URL.createObjectURL(remoteStream);
         this.streamRemoteVideoContainer.appendChild(video);
     };
 
