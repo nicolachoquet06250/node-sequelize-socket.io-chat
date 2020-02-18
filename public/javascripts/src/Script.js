@@ -202,20 +202,20 @@ class Script {
             let peer = new Peer(this.peer_id);
 
             peer.on("open", function(id) {
-                alert("Connected to PeerServer successfully with ID: " + id);
+                console.log("Connected to PeerServer successfully with ID: " + id);
             });
 
             peer.on("error", function(err) {
-                alert("An error occured. Error type: " + err.type);
+                console.log("An error occured. Error type: " + err.type);
 
             });
 
             peer.on("disconnected", function() {
-                alert("Disconnected from signaling server. You ID is taken away. Peer-to-peer connections is still intact");
+                console.log("Disconnected from signaling server. You ID is taken away. Peer-to-peer connections is still intact");
             });
 
             peer.on("close", function() {
-                alert("Connection to signaling server and peer-to-peer connections have been killed. You ID is taken away. You have been destroyed");
+                console.log("Connection to signaling server and peer-to-peer connections have been killed. You ID is taken away. You have been destroyed");
             });
 
             peer.on("connection", function(dataConnection) {
@@ -247,15 +247,15 @@ class Script {
                 myDataConnection = dataConnection;
 
                 dataConnection.on("data", function(data) {
-                    alert("Message from " + dataConnection.peer + ".\n" + data)
+                    console.log("Message from " + dataConnection.peer + ".\n" + data)
                 });
 
                 dataConnection.on("close", function(data) {
-                    alert("DataConnecion closed");
+                    console.log("DataConnecion closed");
                 });
 
                 dataConnection.on("error", function(err) {
-                    alert("Error occured on DataConnection. Error: " + err);
+                    console.log("Error occured on DataConnection. Error: " + err);
                 });
             }
 
@@ -268,18 +268,18 @@ class Script {
                 });
 
                 mediaConnection.on("close", function(data) {
-                    alert("MediaConnecion closed");
+                    console.log("MediaConnecion closed");
                 });
 
                 mediaConnection.on("error", function(err) {
-                    alert("Error occured on MediaConnection. Error: " + err);
+                    console.log("Error occured on MediaConnection. Error: " + err);
                 });
 
                 navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(mediaStream => {
                     this.localStreamVideo.srcObject = mediaStream;
                     mediaConnection.answer(mediaStream);
                 }).catch(function(e) {
-                    alert("Error with MediaStream: " + e);
+                    console.log("Error with MediaStream: " + e);
                 });
             };
 
@@ -292,19 +292,19 @@ class Script {
                 let dataConnection = peer.connect(id, {reliable: true, ordered: true});
                 myDataConnection = dataConnection;
                 dataConnection.on("open", function(){
-                    alert("DataConnecion Established");
+                    console.log("DataConnecion Established");
                 });
 
                 dataConnection.on("data", function(data) {
-                    alert("Message from " + dataConnection.peer + ".\n" + data)
+                    console.log("Message from " + dataConnection.peer + ".\n" + data)
                 });
 
                 dataConnection.on("close", function(data) {
-                    alert("DataConnecion closed");
+                    console.log("DataConnecion closed");
                 });
 
                 dataConnection.on("error", function(err) {
-                    alert("Error occured on DataConnection. Error: " + err);
+                    console.log("Error occured on DataConnection. Error: " + err);
                 })
             }
 
@@ -321,14 +321,14 @@ class Script {
                     });
 
                     mediaConnection.on("error", function(err) {
-                        alert("Error occured on MediaConnection. Error: " + err);
+                        console.log("Error occured on MediaConnection. Error: " + err);
                     });
 
                     mediaConnection.on("close", function(data) {
-                        alert("MediaConnecion closed");
+                        console.log("MediaConnecion closed");
                     });
                 }).catch(function(e){
-                    alert("Error with MediaStream: " + e);
+                    console.log("Error with MediaStream: " + e);
                 });
             };
 
