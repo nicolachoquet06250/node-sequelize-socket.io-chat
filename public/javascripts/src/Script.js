@@ -459,6 +459,8 @@ class Script {
                         button.appendChild(icon);
                         button.addEventListener('click', () => {
                             connect(_user.peer_id);
+
+                            this.show_video_call_container = true;
                         });
                         user_a.appendChild(button);
 
