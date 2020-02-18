@@ -507,11 +507,13 @@ class Script {
                     console.log(_connected_users);
                 });
 
-                server.on_video_call(({type, caller, caller_id, call_id, status}) => {
-                    if(type === 'call') {
+                server.on_video_call(response => {
+                    if(response.type === 'call') {
+                        let {caller, caller_id, call_id} = response;
                         script.call_id = call_id;
                         script.answer_video_call(server, caller, caller_id);
                     } else {
+                        let {status} = response;
                         console.log(status);
                     }
                 });
