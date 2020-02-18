@@ -115,7 +115,8 @@ module.exports = class Websocket {
 
         this.socket.on('connection', client => {
             this.client = client;
-            this.on_save_user(({user}) => {
+            this.on_save_user(({user, peer_id}) => {
+                user.peer_id = peer_id;
                 this.user = user;
                 this.emit(this.client.id, 'get_connected_users', {users: this.users});
                 this.broadcast(this.client.id, 'get_connected_users', {users: this.users});

@@ -63,9 +63,9 @@ class Socket {
             this.id = id;
         })
     }
-    save_user() {
+    save_user(peer_id) {
         let user = localStorage.getItem('user');
-        this.emit('save_user', {user});
+        this.emit('save_user', {user, peer_id: peer_id});
     }
 
     on_welcome(callback) {

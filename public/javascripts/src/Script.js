@@ -101,6 +101,13 @@ class Script {
         localStorage.setItem('call_id', call_id);
     }
 
+    get peer_id() {
+        if(!localStorage.getItem('peer_id')) {
+            localStorage.setItem('peer_id', this.uniqid());
+        }
+        return localStorage.getItem('peer_id');
+    }
+
     /**
      * propriété stream
      * @returns {MediaStream|null}
@@ -118,6 +125,13 @@ class Script {
      */
     get streamRemoteVideoContainer() {
         return document.querySelector('.remote-videos');
+    }
+
+    get localStreamVideo() {
+        return document.querySelector('video#local');
+    }
+    get remoteStreamVideo() {
+        return document.querySelector('video#remote');
     }
 
     /**
@@ -156,39 +170,21 @@ class Script {
             video.play();
         };
         this.streamRemoteVideoContainer.appendChild(video);
-    };
-
-    trig_video_call(server, caller, called) {
-        this.start_stream().then(stream => {
-            this.stream = stream;
-            // Display your local video in video#local element
-            document.querySelector('video#local').srcObject = stream;
-            server.emit('video_call', {type: 'call', id: server.id, caller, called, call_id: this.peer.id});
-        }).catch(console.error);
-
-        this.show_video_call_container = true;
     }
 
-    answer_video_call(server, caller, caller_server_id) {
-        this.start_stream().then(stream => {
-            this.stream = stream;
-            document.querySelector('video#local').srcObject = stream;
-            server.emit('video_call', {type: 'answer', id: server.id, caller_id: caller_server_id});
-            this.peerConnection = this.peer.connect(localStorage.getItem('call_id'));
-
-            let call = this.peer.call(this.call_id, stream);
-            console.log('local', stream);
-            let lastRemoteStream;
-            call.on('stream', remoteStream => {
-                if(!lastRemoteStream) {
-                    this.createRemoteVideo(remoteStream);
-                    console.log('remote', remoteStream);
-                    lastRemoteStream = remoteStream;
-                }
-            });
-
-            this.show_video_call_container = true;
-        }).catch(console.error);
+    uniqid(a = "", b = false) {
+        let c = Date.now()/1000;
+        let d = c.toString(16).split(".").join("");
+        while (d.length < 14) {
+            d += "0";
+        }
+        let e = "";
+        if (b) {
+            e = ".";
+            let f = Math.round(Math.random()*100000000);
+            e += f;
+        }
+        return a + d + e;
     }
 
     /** page scripts */
@@ -202,6 +198,135 @@ class Script {
                 protocol += 's';
             }
             let server = new Socket(`${protocol}://${window.location.host}/`, my_name);
+
+            let peer = new Peer(this.peer_id);
+
+            peer.on("open", function(id) {
+                alert("Connected to PeerServer successfully with ID: " + id);
+            });
+
+            peer.on("error", function(err) {
+                alert("An error occured. Error type: " + err.type);
+
+            });
+
+            peer.on("disconnected", function() {
+                alert("Disconnected from signaling server. You ID is taken away. Peer-to-peer connections is still intact");
+            });
+
+            peer.on("close", function() {
+                alert("Connection to signaling server and peer-to-peer connections have been killed. You ID is taken away. You have been destroyed");
+            });
+
+            peer.on("connection", function(dataConnection) {
+                setTimeout(function() {
+                    if(confirm(dataConnection.peer + " wants to send data to you. Do you want to accept?")) {
+                        acceptDataConnection(dataConnection);
+                    }
+                    else {
+                        dataConnection.close();
+                    }
+                }, 100)
+            });
+
+            peer.on("call", function(mediaConnection) {
+                setTimeout(function() {
+                    if(confirm("Got a call from " + mediaConnection.peer + ". Do you want to pick the call?")) {
+                        acceptMediaConnection(mediaConnection);
+                    }
+                    else {
+                        mediaConnection.close();
+                    }
+                }, 100);
+            });
+
+            let myDataConnection = null;
+            let myMediaConnection = null;
+
+            function acceptDataConnection(dataConnection) {
+                myDataConnection = dataConnection;
+
+                dataConnection.on("data", function(data) {
+                    alert("Message from " + dataConnection.peer + ".\n" + data)
+                });
+
+                dataConnection.on("close", function(data) {
+                    alert("DataConnecion closed");
+                });
+
+                dataConnection.on("error", function(err) {
+                    alert("Error occured on DataConnection. Error: " + err);
+                });
+            }
+
+            function acceptMediaConnection(mediaConnection) {
+                myMediaConnection = mediaConnection;
+
+                mediaConnection.on("stream", function(remoteStream) {
+                    document.getElementById("remoteVideo").setAttribute("src", URL.createObjectURL(remoteStream)); document.getElementById("remoteVideo").play();
+                });
+
+                mediaConnection.on("close", function(data) {
+                    alert("MediaConnecion closed");
+                });
+
+                mediaConnection.on("error", function(err) {
+                    alert("Error occured on MediaConnection. Error: " + err);
+                });
+
+                navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(function(mediaStream) {
+                    mediaConnection.answer(mediaStream);
+                }).catch(function(e) {
+                    alert("Error with MediaStream: " + e);
+                });
+            }
+
+            function connect(id) {
+                establishDataConnection(id);
+                establishMediaConnection(id);
+            }
+
+            function establishDataConnection(id) {
+                let dataConnection = peer.connect(id, {reliable: true, ordered: true});
+                myDataConnection = dataConnection;
+                dataConnection.on("open", function(){
+                    alert("DataConnecion Established");
+                });
+
+                dataConnection.on("data", function(data) {
+                    alert("Message from " + dataConnection.peer + ".\n" + data)
+                });
+
+                dataConnection.on("close", function(data) {
+                    alert("DataConnecion closed");
+                });
+
+                dataConnection.on("error", function(err) {
+                    alert("Error occured on DataConnection. Error: " + err);
+                })
+            }
+
+            function establishMediaConnection(id) {
+                let mediaConnection = null;
+
+                navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(function(mediaStream) {
+                    mediaConnection = peer.call(id, mediaStream);
+                    myMediaConnection = mediaConnection; mediaConnection.on("stream", function(remoteStream) {
+                        script.remoteStreamVideo.srcObject = remoteStream;
+                        script.remoteStreamVideo.play();
+                    });
+
+                    mediaConnection.on("error", function(err) {
+                        alert("Error occured on MediaConnection. Error: " + err);
+                    });
+
+                    mediaConnection.on("close", function(data) {
+                        alert("MediaConnecion closed");
+                    });
+                }).catch(function(e){
+                    alert("Error with MediaStream: " + e);
+                });
+            }
 
             let messages = document.querySelector('.messages');
             let discussions = document.querySelectorAll('.discussions');
@@ -329,7 +454,7 @@ class Script {
                         icon.innerText = 'videocam';
                         button.appendChild(icon);
                         button.addEventListener('click', () => {
-                            this.trig_video_call(server, user, _user);
+                            connect(_user.peer_id);
                         });
                         user_a.appendChild(button);
 
@@ -404,7 +529,7 @@ class Script {
 
             (function definitionDesEcouteursDEvenementsSockets(script) {
                 server.save_client();
-                server.save_user();
+                server.save_user(script.peer_id);
                 server.on_new_discussion(response => {
                     if(response.created)
                         add_discussion_to_list(response.discussion);
@@ -528,17 +653,6 @@ class Script {
                     console.log(_connected_users);
                 });
 
-                server.on_video_call(response => {
-                    if(response.type === 'call') {
-                        let {caller, caller_id, call_id} = response;
-                        script.call_id = call_id;
-                        script.answer_video_call(server, caller, caller_id);
-                    } else {
-                        let {status} = response;
-                        console.log(status);
-                    }
-                });
-
                 server.socket.on('server_log', console.log);
             })(this);
 
@@ -589,49 +703,6 @@ class Script {
             })();
 
             (function definitionDesActionsAuChargementDeLaPage(script) {
-                script.peer = new Peer(null, {debug: 2});
-                script.peer.on('open', () => {
-                    // Workaround for peer.reconnect deleting previous id
-                    if (script.peer.id === null) {
-                        console.log('Received null id from peer open');
-                        script.peer.id = script.lastPeerId;
-                    } else script.lastPeerId = script.peer.id;
-                    console.log(`ID: ${script.peer.id}`);
-                });
-                script.peer.on('connection', conn => script.peerConnection = conn);
-                script.peer.on('call', call => {
-                    script.call_id = script.peer.id;
-                    call.answer(script.stream);
-
-                    console.log('local', script.stream);
-                    let lastRemoteStream;
-                    call.on('stream', stream => {
-                        if(!lastRemoteStream) {
-                            script.createRemoteVideo(stream);
-                            console.log('remote', stream);
-                            lastRemoteStream = stream;
-                        }
-                    })
-                });
-                script.peer.on('disconnected', () => {
-                    console.log('Connection lost. Please reconnect');
-
-                    // Workaround for peer.reconnect deleting previous id
-                    script.peer.id = script.lastPeerId;
-                    script.peer._lastServerId = script.lastPeerId;
-                    script.peer.reconnect();
-                });
-                script.peer.on('close', () => {
-                    script.peerConnection = null;
-                    console.log('Connection destroyed');
-                    script.show_video_call_container = false;
-                });
-                script.peer.on('error', err => {
-                    console.log(err);
-                    alert(`${err}`);
-                    script.show_video_call_container = false;
-                });
-
                 message_form.hide();
                 init_discussions();
                 Script.initAccordionSizes();
