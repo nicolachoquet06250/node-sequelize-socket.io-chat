@@ -197,6 +197,25 @@ module.exports = class Websocket {
                 this.un_save_client(client.id);
                 this.broadcast(client.id, 'get_connected_users', {users: this.users});
             });
+
+            this.client.on('video_call', ({type, id, call_id, caller, called, caller_id}) => {
+                switch (type) {
+                    case 'call':
+                        let called_client;
+                        for(let room of this.socket.sockets.rooms) {
+                            if (room.user && JSON.parse(room.user).id === called.id) {
+                                called_client = room;
+                                break;
+                            }
+                        }
+                        if(called_client) called_client.emit('video_call', {type, caller, caller_id, call_id});
+                        console.log('video call => ', id, call_id, caller, called);
+                        break;
+                    case 'answer':
+                        this.get_client(caller_id).emit('video_call', {type, status: true});
+                        break;
+                }
+            })
         });
     }
 };

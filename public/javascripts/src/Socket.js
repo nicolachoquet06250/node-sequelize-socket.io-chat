@@ -104,4 +104,8 @@ class Socket {
     on_get_connected_users(callback) {
         this.socket.on('get_connected_users', callback);
     }
+
+    on_video_call(callback) {
+        this.socket.on('video_call', callback);
+    }
 }
