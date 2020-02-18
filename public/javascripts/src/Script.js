@@ -259,11 +259,12 @@ class Script {
                 });
             }
 
-            function acceptMediaConnection(mediaConnection) {
+            const acceptMediaConnection = mediaConnection => {
                 myMediaConnection = mediaConnection;
 
-                mediaConnection.on("stream", function(remoteStream) {
-                    document.getElementById("remoteVideo").setAttribute("src", URL.createObjectURL(remoteStream)); document.getElementById("remoteVideo").play();
+                mediaConnection.on("stream", remoteStream => {
+                    this.remoteStreamVideo.srcObject = remoteStream;
+                    this.remoteStreamVideo.play();
                 });
 
                 mediaConnection.on("close", function(data) {
@@ -274,12 +275,13 @@ class Script {
                     alert("Error occured on MediaConnection. Error: " + err);
                 });
 
-                navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(function(mediaStream) {
+                navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(mediaStream => {
+                    this.localStreamVideo.srcObject = mediaStream;
                     mediaConnection.answer(mediaStream);
                 }).catch(function(e) {
                     alert("Error with MediaStream: " + e);
                 });
-            }
+            };
 
             function connect(id) {
                 establishDataConnection(id);
@@ -306,14 +308,16 @@ class Script {
                 })
             }
 
-            function establishMediaConnection(id) {
+            const establishMediaConnection = id => {
                 let mediaConnection = null;
 
-                navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(function(mediaStream) {
+                this.start_stream().then(mediaStream => {
+                    this.localStreamVideo.srcObject = mediaStream;
                     mediaConnection = peer.call(id, mediaStream);
-                    myMediaConnection = mediaConnection; mediaConnection.on("stream", function(remoteStream) {
-                        script.remoteStreamVideo.srcObject = remoteStream;
-                        script.remoteStreamVideo.play();
+                    myMediaConnection = mediaConnection;
+                    mediaConnection.on("stream", remoteStream => {
+                        this.remoteStreamVideo.srcObject = remoteStream;
+                        this.remoteStreamVideo.play();
                     });
 
                     mediaConnection.on("error", function(err) {
@@ -326,7 +330,7 @@ class Script {
                 }).catch(function(e){
                     alert("Error with MediaStream: " + e);
                 });
-            }
+            };
 
             let messages = document.querySelector('.messages');
             let discussions = document.querySelectorAll('.discussions');
