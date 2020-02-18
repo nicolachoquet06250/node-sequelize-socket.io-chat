@@ -173,7 +173,13 @@ class Script {
             document.querySelector('video#local').srcObject = stream;
             server.emit('video_call', {type: 'answer', id: server.id, caller_id: caller_server_id});
             this.peerConnection = this.peer.connect(localStorage.getItem('call_id'), {reliable: true});
-            this.peer.call(this.call_id, stream).on('stream', stream => this.createRemoteVideo(stream));
+
+            let call = this.peer.call(this.call_id, stream);
+            console.log('local', stream);
+            call.on('stream', stream => {
+                this.createRemoteVideo(stream);
+                console.log('remote', stream);
+            });
 
             this.show_video_call_container = true;
         }).catch(console.error);
@@ -591,7 +597,12 @@ class Script {
                     script.call_id = script.peer.id;
                     call.answer(script.stream);
 
-                    call.on('stream', stream => script.createRemoteVideo(stream))
+                    console.log('local', script.stream);
+
+                    call.on('stream', stream => {
+                        script.createRemoteVideo(stream);
+                        console.log('remote', stream)
+                    })
                 });
                 script.peer.on('disconnected', () => {
                     console.log('Connection lost. Please reconnect');
