@@ -170,6 +170,7 @@ class Script {
     answer_video_call(server, caller, caller_server_id) {
         this.start_stream().then(stream => {
             this.stream = stream;
+            document.querySelector('video#local').srcObject = stream;
             server.emit('video_call', {type: 'answer', id: server.id, caller_id: caller_server_id});
             this.peerConnection = this.peer.connect(localStorage.getItem('call_id'), {reliable: true});
             this.peer.call(this.call_id, stream).on('stream', stream => this.createRemoteVideo(stream));
