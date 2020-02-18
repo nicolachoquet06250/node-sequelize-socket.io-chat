@@ -214,6 +214,8 @@ module.exports = class Websocket {
                         break;
                     case 'answer':
                         this.get_client(caller_id).emit('video_call', {type, status: true});
+                        this.broadcast(id, 'server_log', ['video answer => ', caller_id, true]);
+                        console.log('video answer => ', caller_id, true);
                         break;
                 }
             })
