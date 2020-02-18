@@ -149,11 +149,11 @@ class Script {
         return navigator.mediaDevices.getUserMedia({audio: true, video: true});
     }
 
-    createRemoteVideo(remoteStream) {
+    createRemoteVideo() {
         let video = document.createElement('video');
         video.autoplay = true;
-        video.src = URL.createObjectURL(remoteStream);
         this.streamRemoteVideoContainer.appendChild(video);
+        return video;
     };
 
     trig_video_call(server, caller, called) {
@@ -177,7 +177,8 @@ class Script {
             let call = this.peer.call(this.call_id, stream);
             console.log('local', stream);
             call.on('stream', stream => {
-                this.createRemoteVideo(stream);
+                let video = this.createRemoteVideo();
+                video.srcObject = stream;
                 console.log('remote', stream);
             });
 
@@ -600,7 +601,8 @@ class Script {
                     console.log('local', script.stream);
 
                     call.on('stream', stream => {
-                        script.createRemoteVideo(stream);
+                        let video = script.createRemoteVideo();
+                        video.srcObject = stream;
                         console.log('remote', stream)
                     })
                 });
