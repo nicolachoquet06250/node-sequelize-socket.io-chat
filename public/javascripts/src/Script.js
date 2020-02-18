@@ -161,9 +161,7 @@ class Script {
             this.stream = stream;
             // Display your local video in video#local element
             document.querySelector('video#local').srcObject = stream;
-            stream.addEventListener('active', () => {
-                server.emit('video_call', {type: 'call', id: server.id, caller, called, call_id: this.peer.id});
-            });
+            server.emit('video_call', {type: 'call', id: server.id, caller, called, call_id: this.peer.id});
         }).catch(console.error);
 
         this.show_video_call_container = true;
@@ -173,24 +171,24 @@ class Script {
         this.start_stream().then(stream => {
             this.stream = stream;
             document.querySelector('video#local').srcObject = stream;
-            stream.addEventListener('active', () => {
-                server.emit('video_call', {type: 'answer', id: server.id, caller_id: caller_server_id});
-                this.peerConnection = this.peer.connect(localStorage.getItem('call_id'), {reliable: true});
+            server.emit('video_call', {type: 'answer', id: server.id, caller_id: caller_server_id});
+            this.peerConnection = this.peer.connect(localStorage.getItem('call_id'), {reliable: true});
 
-                let call = this.peer.call(this.call_id, stream);
-                console.log('local', stream);
-                let lastRemoteStream;
-                call.on('stream', remoteStream => {
-                    if(!lastRemoteStream) {
+            let call = this.peer.call(this.call_id, stream);
+            console.log('local', stream);
+            let lastRemoteStream;
+            call.on('stream', remoteStream => {
+                if(!lastRemoteStream) {
+                    remoteStream.addEventListener('active', () => {
                         let video = this.createRemoteVideo();
                         video.srcObject = remoteStream;
                         console.log('remote', remoteStream);
                         lastRemoteStream = remoteStream;
-                    }
-                });
-
-                this.show_video_call_container = true;
+                    });
+                }
             });
+
+            this.show_video_call_container = true;
         }).catch(console.error);
     }
 
@@ -609,12 +607,14 @@ class Script {
                     console.log('local', script.stream);
                     let lastRemoteStream;
                     call.on('stream', stream => {
-                        if(!lastRemoteStream) {
-                            let video = script.createRemoteVideo();
-                            video.srcObject = stream;
-                            console.log('remote', stream);
-                            lastRemoteStream = stream;
-                        }
+                        stream.addEventListener('active', () => {
+                            if(!lastRemoteStream) {
+                                let video = script.createRemoteVideo();
+                                video.srcObject = stream;
+                                console.log('remote', stream);
+                                lastRemoteStream = stream;
+                            }
+                        })
                     })
                 });
                 script.peer.on('disconnected', () => {
