@@ -178,14 +178,14 @@ class Script {
             console.log('local', stream);
             let lastRemoteStream;
             call.on('stream', remoteStream => {
-                if(!lastRemoteStream) {
-                    remoteStream.addEventListener('active', () => {
+                remoteStream.addEventListener('active', () => {
+                    if(!lastRemoteStream) {
                         let video = this.createRemoteVideo();
                         video.srcObject = remoteStream;
                         console.log('remote', remoteStream);
                         lastRemoteStream = remoteStream;
-                    });
-                }
+                    }
+                });
             });
 
             this.show_video_call_container = true;
