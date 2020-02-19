@@ -11,3 +11,12 @@
         - https://www.materialpalette.com/icons
    - generate ssl key
         - http://www.linux-france.org/prj/edu/archinet/systeme/ch24s03.html
+   - WEB RTC
+        - https://blog.mozilla.org/webrtc/perfect-negotiation-in-webrtc/
+        - about:webrtc
+        - https://blockchain.dcwebmakers.com/blog/using-advance-js-and-webrtc-for-cross-browser-communications-in-real-time.html
+        - https://peerjs.com
+        - https://www.google.com/search?client=firefox-b-e&q=video+chat+webRTC+tuto
+        - https://www.kirupa.com/html5/simple_video_chat_with_webrtc.htm
+        - https://www.sitepoint.com/webrtc-video-chat-application-simplewebrtc/
+        - https://www.google.com/search?q=lib+js+webrtc&client=firefox-b-e&sxsrf=ACYBGNSl0a8m0h9pTxNvojgiyak32VIZ7w:1582030858596&ei=CuBLXoaQJIn0U82RjfAP&start=10&sa=N&ved=2ahUKEwiGveaalNvnAhUJ-hQKHc1IA_4Q8NMDegQIDBBE&biw=1920&bih=926
