@@ -283,6 +283,10 @@ class Script {
                 });
             };
 
+            window.addEventListener('beforeunload', e => {
+                e.preventDefault();
+            });
+
             function connect(id) {
                 establishDataConnection(id);
                 establishMediaConnection(id);
