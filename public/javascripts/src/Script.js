@@ -288,7 +288,9 @@ class Script {
             });
 
             function connect(id) {
+                console.log('Try to establish data connection');
                 establishDataConnection(id);
+                console.log('Try to establish media connection');
                 establishMediaConnection(id);
             }
 
