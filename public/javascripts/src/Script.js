@@ -219,21 +219,25 @@ class Script {
             });
 
             peer.on("connection", function(dataConnection) {
-                if(confirm(dataConnection.peer + " wants to send data to you. Do you want to accept?")) {
-                    acceptDataConnection(dataConnection);
-                }
-                else {
-                    dataConnection.close();
-                }
+                setTimeout(function() {
+                    if(confirm(dataConnection.peer + " wants to send data to you. Do you want to accept?")) {
+                        acceptDataConnection(dataConnection);
+                    }
+                    else {
+                        dataConnection.close();
+                    }
+                }, 100)
             });
 
             peer.on("call", function(mediaConnection) {
-                if(confirm("Got a call from " + mediaConnection.peer + ". Do you want to pick the call?")) {
-                    acceptMediaConnection(mediaConnection);
-                }
-                else {
-                    mediaConnection.close();
-                }
+                setTimeout(function() {
+                    if(confirm("Got a call from " + mediaConnection.peer + ". Do you want to pick the call?")) {
+                        acceptMediaConnection(mediaConnection);
+                    }
+                    else {
+                        mediaConnection.close();
+                    }
+                }, 100);
             });
 
             let myDataConnection = null;
