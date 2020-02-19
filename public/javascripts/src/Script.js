@@ -201,63 +201,35 @@ class Script {
 
             let peer = new Peer(this.peer_id);
 
-            peer.on("open", function(id) {
-                console.log("Connected to PeerServer successfully with ID: " + id);
-            });
+            peer.on("open", id => console.log("Connected to PeerServer successfully with ID: " + id));
 
-            peer.on("error", function(err) {
-                console.log("An error occured. Error type: " + err.type);
+            peer.on("error", err => console.log("An error occured. Error type: " + err.type));
 
-            });
+            peer.on("disconnected", () =>
+                console.log("Disconnected from signaling server. You ID is taken away. Peer-to-peer connections is still intact"));
 
-            peer.on("disconnected", function() {
-                console.log("Disconnected from signaling server. You ID is taken away. Peer-to-peer connections is still intact");
-            });
+            peer.on("close", () =>
+                console.log("Connection to signaling server and peer-to-peer connections have been killed. You ID is taken away. You have been destroyed"));
 
-            peer.on("close", function() {
-                console.log("Connection to signaling server and peer-to-peer connections have been killed. You ID is taken away. You have been destroyed");
-            });
+            peer.on("connection", dataConnection =>
+                setTimeout(() =>
+                    confirm(dataConnection.peer + " wants to send data to you. Do you want to accept?")
+                        ? acceptDataConnection(dataConnection) : dataConnection.close(), 100));
 
-            peer.on("connection", function(dataConnection) {
-                setTimeout(function() {
-                    if(confirm(dataConnection.peer + " wants to send data to you. Do you want to accept?")) {
-                        acceptDataConnection(dataConnection);
-                    }
-                    else {
-                        dataConnection.close();
-                    }
-                }, 100)
-            });
-
-            peer.on("call", function(mediaConnection) {
-                setTimeout(function() {
-                    if(confirm("Got a call from " + mediaConnection.peer + ". Do you want to pick the call?")) {
-                        acceptMediaConnection(mediaConnection);
-                    }
-                    else {
-                        mediaConnection.close();
-                    }
-                }, 100);
-            });
+            peer.on("call", mediaConnection =>
+                setTimeout(() =>
+                    confirm("Got a call from " + mediaConnection.peer + ". Do you want to pick the call?")
+                        ? acceptMediaConnection(mediaConnection) : mediaConnection.close(), 100));
 
             let myDataConnection = null;
             let myMediaConnection = null;
 
-            function acceptDataConnection(dataConnection) {
+            const acceptDataConnection = dataConnection => {
                 myDataConnection = dataConnection;
-
-                dataConnection.on("data", function(data) {
-                    console.log("Message from " + dataConnection.peer + ".\n" + data)
-                });
-
-                dataConnection.on("close", function(data) {
-                    console.log("DataConnecion closed");
-                });
-
-                dataConnection.on("error", function(err) {
-                    console.log("Error occured on DataConnection. Error: " + err);
-                });
-            }
+                dataConnection.on("data", data => console.log("Message from " + dataConnection.peer + ".\n" + data));
+                dataConnection.on("close", data => console.log("DataConnecion closed"));
+                dataConnection.on("error", err => console.log("Error occured on DataConnection. Error: " + err));
+            };
 
             const acceptMediaConnection = mediaConnection => {
                 myMediaConnection = mediaConnection;
@@ -283,32 +255,21 @@ class Script {
                 });
             };
 
-            function connect(id) {
+            const connect = id => {
                 console.log('Try to establish data connection');
                 establishDataConnection(id);
                 console.log('Try to establish media connection');
                 establishMediaConnection(id);
-            }
+            };
 
-            function establishDataConnection(id) {
+            const establishDataConnection = id => {
                 let dataConnection = peer.connect(id, {reliable: true, ordered: true});
                 myDataConnection = dataConnection;
-                dataConnection.on("open", function(){
-                    console.log("DataConnecion Established");
-                });
-
-                dataConnection.on("data", function(data) {
-                    console.log("Message from " + dataConnection.peer + ".\n" + data)
-                });
-
-                dataConnection.on("close", function(data) {
-                    console.log("DataConnecion closed");
-                });
-
-                dataConnection.on("error", function(err) {
-                    console.log("Error occured on DataConnection. Error: " + err);
-                })
-            }
+                dataConnection.on("open", () => console.log("DataConnecion Established"));
+                dataConnection.on("data", data => console.log("Message from " + dataConnection.peer + ".\n" + data));
+                dataConnection.on("close", data => console.log("DataConnecion closed"));
+                dataConnection.on("error", err => console.log("Error occured on DataConnection. Error: " + err))
+            };
 
             const establishMediaConnection = id => {
                 let mediaConnection = null;
