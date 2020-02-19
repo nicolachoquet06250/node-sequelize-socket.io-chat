@@ -283,10 +283,6 @@ class Script {
                 });
             };
 
-            window.addEventListener('beforeunload', e => {
-                e.preventDefault();
-            });
-
             function connect(id) {
                 console.log('Try to establish data connection');
                 establishDataConnection(id);
